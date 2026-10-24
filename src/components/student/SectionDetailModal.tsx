@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
+import { ImageLightboxModal } from '../common/ImageLightboxModal';
+import { SAMPLE_RESULT_SLIP } from '../../data/sampleDocuments';
 import { 
   X, 
   Plus, 
@@ -10,7 +12,11 @@ import {
   Award, 
   Trophy, 
   ShieldCheck, 
-  FileText 
+  FileText,
+  Upload,
+  Eye,
+  FileCheck2,
+  Image as ImageIcon
 } from 'lucide-react';
 
 interface SectionDetailModalProps {
@@ -64,6 +70,7 @@ export const SectionDetailModal: React.FC<SectionDetailModalProps> = ({ sectionI
     technologies: '',
     link: '',
     period: '',
+    imageUrl: '',
   });
 
   // New Certification state
@@ -72,6 +79,7 @@ export const SectionDetailModal: React.FC<SectionDetailModalProps> = ({ sectionI
     issuer: '',
     issueDate: '',
     credentialId: '',
+    imageUrl: '',
   });
 
   // New Achievement state
@@ -80,6 +88,7 @@ export const SectionDetailModal: React.FC<SectionDetailModalProps> = ({ sectionI
     organization: '',
     year: new Date().getFullYear().toString(),
     description: '',
+    imageUrl: '',
   });
 
   // New Leadership state
@@ -92,11 +101,64 @@ export const SectionDetailModal: React.FC<SectionDetailModalProps> = ({ sectionI
 
   const [isAdding, setIsAdding] = useState(false);
 
+  // Lightbox preview state
+  const [lightbox, setLightbox] = useState<{
+    isOpen: boolean;
+    imageUrl: string | null;
+    title: string;
+    subtitle?: string;
+  }>({
+    isOpen: false,
+    imageUrl: null,
+    title: '',
+  });
+
   if (!sectionId || sectionId === 'overview') return null;
+
+  // File upload helper
+  const handleFileUpload = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    callback: (base64: string, fileName?: string) => void
+  ) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        callback(reader.result as string, file.name);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSaveAboutMe = () => {
     updateStudentProfile({ aboutMe: aboutMeText });
     onClose();
+  };
+
+  const handleResultSlipUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleFileUpload(e, (base64, fileName) => {
+      updateStudentProfile({
+        resultSlipUrl: base64,
+        resultSlipName: fileName || 'Uploaded_Result_Slip.pdf',
+        resultSlipUploadedAt: new Date().toISOString().split('T')[0],
+      });
+    });
+  };
+
+  const handleUseSampleResultSlip = () => {
+    updateStudentProfile({
+      resultSlipUrl: SAMPLE_RESULT_SLIP,
+      resultSlipName: 'AU_Official_Result_Slip_Semester1_2026.pdf',
+      resultSlipUploadedAt: new Date().toISOString().split('T')[0],
+    });
+  };
+
+  const handleRemoveResultSlip = () => {
+    updateStudentProfile({
+      resultSlipUrl: undefined,
+      resultSlipName: undefined,
+      resultSlipUploadedAt: undefined,
+    });
   };
 
   const handleAddCourse = (e: React.FormEvent) => {
@@ -140,6 +202,7 @@ export const SectionDetailModal: React.FC<SectionDetailModalProps> = ({ sectionI
       technologies: '',
       link: '',
       period: '',
+      imageUrl: '',
     });
     setIsAdding(false);
   };
@@ -153,6 +216,7 @@ export const SectionDetailModal: React.FC<SectionDetailModalProps> = ({ sectionI
       issuer: '',
       issueDate: '',
       credentialId: '',
+      imageUrl: '',
     });
     setIsAdding(false);
   };
@@ -166,6 +230,7 @@ export const SectionDetailModal: React.FC<SectionDetailModalProps> = ({ sectionI
       organization: '',
       year: new Date().getFullYear().toString(),
       description: '',
+      imageUrl: '',
     });
     setIsAdding(false);
   };
@@ -186,10 +251,10 @@ export const SectionDetailModal: React.FC<SectionDetailModalProps> = ({ sectionI
   const getSectionTitle = () => {
     switch (sectionId) {
       case 'about': return { title: 'Personal Statement & About Me', icon: FileText };
-      case 'courses': return { title: 'Academic Courses & Results', icon: BookOpen };
+      case 'courses': return { title: 'Academic Courses, Results & Transcript Slip', icon: BookOpen };
       case 'skills': return { title: 'Key Competencies & Skills', icon: Star };
       case 'projects': return { title: 'Projects & Academic Portfolios', icon: Briefcase };
-      case 'certifications': return { title: 'Certifications & Professional Credentials', icon: Award };
+      case 'certifications': return { title: 'Certifications & Proof Images', icon: Award };
       case 'achievements': return { title: 'Honors, Awards & Achievements', icon: Trophy };
       case 'leadership': return { title: 'Leadership & Extracurricular Service', icon: ShieldCheck };
       default: return { title: 'Record Details', icon: FileText };
@@ -200,600 +265,861 @@ export const SectionDetailModal: React.FC<SectionDetailModalProps> = ({ sectionI
   const Icon = sectionMeta.icon;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-      <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden border border-neutral-200 flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200">
-        
-        {/* Modal Header */}
-        <div className="px-6 py-4 border-b border-neutral-200 flex items-center justify-between bg-neutral-50/50">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-[#A51C30]/10 text-[#A51C30]">
-              <Icon className="w-5 h-5" />
+    <>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+        <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden border border-neutral-200 flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200">
+          
+          {/* Modal Header */}
+          <div className="px-6 py-4 border-b border-neutral-200 flex items-center justify-between bg-neutral-50/50">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-lg bg-[#A51C30]/10 text-[#A51C30]">
+                <Icon className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-neutral-900">{sectionMeta.title}</h3>
+                <p className="text-xs text-neutral-500">View and update records with official documentation</p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-base font-bold text-neutral-900">{sectionMeta.title}</h3>
-              <p className="text-xs text-neutral-500">View and update records to strengthen your recommendation</p>
-            </div>
+            <button
+              onClick={onClose}
+              className="p-1 rounded-lg text-neutral-400 hover:text-neutral-700 hover:bg-neutral-200/60 transition-colors cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1 rounded-lg text-neutral-400 hover:text-neutral-700 hover:bg-neutral-200/60 transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
 
-        {/* Modal Content */}
-        <div className="p-6 overflow-y-auto space-y-6">
+          {/* Modal Content */}
+          <div className="p-6 overflow-y-auto space-y-6">
 
-          {/* SECTION: ABOUT ME */}
-          {sectionId === 'about' && (
-            <div className="space-y-4">
-              <label className="block text-xs font-semibold text-neutral-700">
-                Personal statement / Academic goals
-              </label>
-              <textarea
-                rows={6}
-                value={aboutMeText}
-                onChange={e => setAboutMeText(e.target.value)}
-                placeholder="Describe your academic interests, key achievements, professional ambitions, and what makes you unique..."
-                className="w-full p-3.5 text-sm border border-neutral-300 rounded-lg focus:ring-2 focus:ring-[#A51C30] focus:outline-hidden leading-relaxed"
-              />
-              <div className="flex justify-end">
-                <button
-                  onClick={handleSaveAboutMe}
-                  className="px-5 py-2 text-xs font-semibold bg-[#A51C30] hover:bg-[#8B1727] text-white rounded-lg shadow-sm"
-                >
-                  Save Statement
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* SECTION: COURSES */}
-          {sectionId === 'courses' && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-neutral-600">
-                  {student.courses.length} Course records
-                </span>
-                {!isAdding && (
+            {/* SECTION: ABOUT ME */}
+            {sectionId === 'about' && (
+              <div className="space-y-4">
+                <label className="block text-xs font-semibold text-neutral-700">
+                  Personal statement / Academic goals
+                </label>
+                <textarea
+                  rows={6}
+                  value={aboutMeText}
+                  onChange={e => setAboutMeText(e.target.value)}
+                  placeholder="Describe your academic interests, key achievements, professional ambitions, and what makes you unique..."
+                  className="w-full p-3.5 text-sm border border-neutral-300 rounded-lg focus:ring-2 focus:ring-[#A51C30] focus:outline-hidden leading-relaxed"
+                />
+                <div className="flex justify-end">
                   <button
-                    onClick={() => setIsAdding(true)}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold bg-neutral-900 text-white rounded-lg hover:bg-neutral-800"
+                    onClick={handleSaveAboutMe}
+                    className="px-5 py-2 text-xs font-semibold bg-[#A51C30] hover:bg-[#8B1727] text-white rounded-lg shadow-sm cursor-pointer"
                   >
-                    <Plus className="w-3.5 h-3.5" />
-                    Add Course
+                    Save Statement
                   </button>
-                )}
+                </div>
               </div>
+            )}
 
-              {isAdding && (
-                <form onSubmit={handleAddCourse} className="p-4 bg-neutral-50 border border-neutral-200 rounded-xl space-y-3">
-                  <h4 className="text-xs font-bold text-neutral-900 uppercase tracking-wide">New Course Record</h4>
-                  <div className="grid grid-cols-2 gap-3">
-                    <input
-                      type="text"
-                      placeholder="Course Code (e.g. CSC 301)"
-                      value={newCourse.code}
-                      onChange={e => setNewCourse({ ...newCourse, code: e.target.value })}
-                      required
-                      className="px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Course Title"
-                      value={newCourse.title}
-                      onChange={e => setNewCourse({ ...newCourse, title: e.target.value })}
-                      required
-                      className="px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
-                    />
-                  </div>
-                  <div className="grid grid-cols-3 gap-3">
-                    <select
-                      value={newCourse.grade}
-                      onChange={e => setNewCourse({ ...newCourse, grade: e.target.value })}
-                      className="px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
-                    >
-                      {['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'Pass'].map(g => (
-                        <option key={g} value={g}>Grade: {g}</option>
-                      ))}
-                    </select>
-                    <input
-                      type="number"
-                      placeholder="Credits (e.g. 4)"
-                      value={newCourse.credits}
-                      onChange={e => setNewCourse({ ...newCourse, credits: Number(e.target.value) })}
-                      className="px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Semester"
-                      value={newCourse.semester}
-                      onChange={e => setNewCourse({ ...newCourse, semester: e.target.value })}
-                      className="px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
-                    />
-                  </div>
-                  <div className="flex justify-end gap-2 pt-2">
-                    <button
-                      type="button"
-                      onClick={() => setIsAdding(false)}
-                      className="px-3 py-1.5 text-xs text-neutral-600 hover:text-neutral-900"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-4 py-1.5 text-xs font-semibold bg-[#A51C30] text-white rounded-md"
-                    >
-                      Save Course
-                    </button>
-                  </div>
-                </form>
-              )}
-
-              <div className="divide-y divide-neutral-100 border border-neutral-200 rounded-xl overflow-hidden bg-white">
-                {student.courses.map((course) => (
-                  <div key={course.id} className="p-3.5 flex items-center justify-between hover:bg-neutral-50/60 transition-colors">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-xs text-neutral-900">{course.code}</span>
-                        <span className="text-xs text-neutral-600">· {course.title}</span>
-                      </div>
-                      <div className="text-[11px] text-neutral-400 mt-0.5">
-                        {course.semester} · {course.credits} Credits
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-neutral-100 text-[#A51C30] border border-neutral-200">
-                        Grade {course.grade}
+            {/* SECTION: COURSES & RESULTS SLIP */}
+            {sectionId === 'courses' && (
+              <div className="space-y-5">
+                
+                {/* Official Result Slip Card */}
+                <div className="p-4 rounded-xl border border-neutral-200 bg-neutral-50/70 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <FileCheck2 className="w-4 h-4 text-[#A51C30]" />
+                      <span className="text-xs font-bold text-neutral-900 uppercase tracking-wide">
+                        Official Academic Result Slip
                       </span>
-                      <button
-                        onClick={() => removeCourse(course.id)}
-                        className="text-neutral-400 hover:text-red-600 p-1 rounded-md transition-colors"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* SECTION: SKILLS */}
-          {sectionId === 'skills' && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-neutral-600">
-                  {student.skills.length} Skills Listed
-                </span>
-                {!isAdding && (
-                  <button
-                    onClick={() => setIsAdding(true)}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold bg-neutral-900 text-white rounded-lg hover:bg-neutral-800"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    Add Skill
-                  </button>
-                )}
-              </div>
-
-              {isAdding && (
-                <form onSubmit={handleAddSkill} className="p-4 bg-neutral-50 border border-neutral-200 rounded-xl space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
-                    <input
-                      type="text"
-                      placeholder="Skill name (e.g. Python, SQL)"
-                      value={newSkill.name}
-                      onChange={e => setNewSkill({ ...newSkill, name: e.target.value })}
-                      required
-                      className="px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
-                    />
-                    <select
-                      value={newSkill.category}
-                      onChange={e => setNewSkill({ ...newSkill, category: e.target.value as any })}
-                      className="px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
-                    >
-                      <option value="Technical">Technical</option>
-                      <option value="Soft">Soft Skill</option>
-                      <option value="Domain">Domain Knowledge</option>
-                    </select>
-                  </div>
-                  <div className="flex justify-end gap-2 pt-1">
-                    <button
-                      type="button"
-                      onClick={() => setIsAdding(false)}
-                      className="px-3 py-1.5 text-xs text-neutral-600 hover:text-neutral-900"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-4 py-1.5 text-xs font-semibold bg-[#A51C30] text-white rounded-md"
-                    >
-                      Save Skill
-                    </button>
-                  </div>
-                </form>
-              )}
-
-              <div className="flex flex-wrap gap-2">
-                {student.skills.map((skill) => (
-                  <div
-                    key={skill.id}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-neutral-100 hover:bg-neutral-200/80 rounded-lg border border-neutral-200 text-xs text-neutral-800"
-                  >
-                    <span className="font-medium">{skill.name}</span>
-                    <span className="text-[10px] text-neutral-400">({skill.category})</span>
-                    <button
-                      onClick={() => removeSkill(skill.id)}
-                      className="text-neutral-400 hover:text-red-600 transition-colors"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* SECTION: PROJECTS */}
-          {sectionId === 'projects' && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-neutral-600">
-                  {student.projects.length} Project Records
-                </span>
-                {!isAdding && (
-                  <button
-                    onClick={() => setIsAdding(true)}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold bg-neutral-900 text-white rounded-lg hover:bg-neutral-800"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    Add Project
-                  </button>
-                )}
-              </div>
-
-              {isAdding && (
-                <form onSubmit={handleAddProject} className="p-4 bg-neutral-50 border border-neutral-200 rounded-xl space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
-                    <input
-                      type="text"
-                      placeholder="Project Title"
-                      value={newProject.title}
-                      onChange={e => setNewProject({ ...newProject, title: e.target.value })}
-                      required
-                      className="px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Role (e.g. Lead Developer)"
-                      value={newProject.role}
-                      onChange={e => setNewProject({ ...newProject, role: e.target.value })}
-                      className="px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
-                    />
-                  </div>
-                  <textarea
-                    rows={3}
-                    placeholder="Brief description of the project and impact..."
-                    value={newProject.description}
-                    onChange={e => setNewProject({ ...newProject, description: e.target.value })}
-                    className="w-full px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Technologies (comma separated: React, Python, Docker)"
-                    value={newProject.technologies}
-                    onChange={e => setNewProject({ ...newProject, technologies: e.target.value })}
-                    className="w-full px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
-                  />
-                  <div className="flex justify-end gap-2 pt-1">
-                    <button
-                      type="button"
-                      onClick={() => setIsAdding(false)}
-                      className="px-3 py-1.5 text-xs text-neutral-600 hover:text-neutral-900"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-4 py-1.5 text-xs font-semibold bg-[#A51C30] text-white rounded-md"
-                    >
-                      Save Project
-                    </button>
-                  </div>
-                </form>
-              )}
-
-              <div className="space-y-3">
-                {student.projects.map((proj) => (
-                  <div key={proj.id} className="p-4 border border-neutral-200 rounded-xl bg-white hover:border-neutral-300 transition-colors">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h4 className="text-sm font-bold text-neutral-900">{proj.title}</h4>
-                        <div className="text-xs text-[#A51C30] font-medium mt-0.5">{proj.role}</div>
-                      </div>
-                      <button
-                        onClick={() => removeProject(proj.id)}
-                        className="text-neutral-400 hover:text-red-600 p-1 transition-colors"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                    <p className="text-xs text-neutral-600 mt-2 leading-relaxed">{proj.description}</p>
-                    {proj.technologies.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 mt-3">
-                        {proj.technologies.map(t => (
-                          <span key={t} className="px-2 py-0.5 rounded text-[10px] font-medium bg-neutral-100 text-neutral-700">
-                            {t}
-                          </span>
-                        ))}
-                      </div>
+                    {student.resultSlipUrl && (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                        Verified Attached
+                      </span>
                     )}
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
 
-          {/* SECTION: CERTIFICATIONS */}
-          {sectionId === 'certifications' && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-neutral-600">
-                  {student.certifications.length} Certifications
-                </span>
-                {!isAdding && (
-                  <button
-                    onClick={() => setIsAdding(true)}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold bg-neutral-900 text-white rounded-lg hover:bg-neutral-800"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    Add Certificate
-                  </button>
-                )}
-              </div>
+                  {student.resultSlipUrl ? (
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-white rounded-lg border border-neutral-200">
+                      <div className="flex items-center gap-3 overflow-hidden">
+                        <div className="w-10 h-10 rounded bg-[#FAF0F1] text-[#A51C30] flex items-center justify-center shrink-0">
+                          <FileText className="w-5 h-5" />
+                        </div>
+                        <div className="truncate">
+                          <div className="text-xs font-bold text-neutral-900 truncate">
+                            {student.resultSlipName || 'Academic_Result_Slip.pdf'}
+                          </div>
+                          <div className="text-[10px] text-neutral-400">
+                            Uploaded {student.resultSlipUploadedAt || 'Recently'} · Official Document
+                          </div>
+                        </div>
+                      </div>
 
-              {isAdding && (
-                <form onSubmit={handleAddCert} className="p-4 bg-neutral-50 border border-neutral-200 rounded-xl space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
-                    <input
-                      type="text"
-                      placeholder="Certificate Title"
-                      value={newCert.title}
-                      onChange={e => setNewCert({ ...newCert, title: e.target.value })}
-                      required
-                      className="px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Issuing Organization"
-                      value={newCert.issuer}
-                      onChange={e => setNewCert({ ...newCert, issuer: e.target.value })}
-                      required
-                      className="px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <input
-                      type="text"
-                      placeholder="Issue Date (e.g. Jan 2026)"
-                      value={newCert.issueDate}
-                      onChange={e => setNewCert({ ...newCert, issueDate: e.target.value })}
-                      className="px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Credential ID"
-                      value={newCert.credentialId}
-                      onChange={e => setNewCert({ ...newCert, credentialId: e.target.value })}
-                      className="px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
-                    />
-                  </div>
-                  <div className="flex justify-end gap-2 pt-1">
-                    <button
-                      type="button"
-                      onClick={() => setIsAdding(false)}
-                      className="px-3 py-1.5 text-xs text-neutral-600 hover:text-neutral-900"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-4 py-1.5 text-xs font-semibold bg-[#A51C30] text-white rounded-md"
-                    >
-                      Save Certificate
-                    </button>
-                  </div>
-                </form>
-              )}
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => setLightbox({
+                            isOpen: true,
+                            imageUrl: student.resultSlipUrl || null,
+                            title: 'Official Africa University Result Slip',
+                            subtitle: `${student.fullName} · ${student.programme}`,
+                          })}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-neutral-900 hover:bg-neutral-800 text-white rounded-md cursor-pointer transition-colors shadow-2xs"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>View Result Slip</span>
+                        </button>
 
-              <div className="space-y-2">
-                {student.certifications.map(c => (
-                  <div key={c.id} className="p-3.5 border border-neutral-200 rounded-xl bg-white flex items-center justify-between">
-                    <div>
-                      <h4 className="text-xs font-bold text-neutral-900">{c.title}</h4>
-                      <p className="text-[11px] text-neutral-500">{c.issuer} · {c.issueDate}</p>
+                        <button
+                          type="button"
+                          onClick={handleRemoveResultSlip}
+                          className="p-1.5 text-neutral-400 hover:text-red-600 rounded-md transition-colors cursor-pointer"
+                          title="Remove attached result slip"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
-                    <button
-                      onClick={() => removeCertification(c.id)}
-                      className="text-neutral-400 hover:text-red-600 p-1"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* SECTION: ACHIEVEMENTS */}
-          {sectionId === 'achievements' && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-neutral-600">
-                  {student.achievements.length} Achievements
-                </span>
-                {!isAdding && (
-                  <button
-                    onClick={() => setIsAdding(true)}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold bg-neutral-900 text-white rounded-lg hover:bg-neutral-800"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    Add Award
-                  </button>
-                )}
-              </div>
-
-              {isAdding && (
-                <form onSubmit={handleAddAch} className="p-4 bg-neutral-50 border border-neutral-200 rounded-xl space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
-                    <input
-                      type="text"
-                      placeholder="Award or Honor Title"
-                      value={newAch.title}
-                      onChange={e => setNewAch({ ...newAch, title: e.target.value })}
-                      required
-                      className="px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Awarding Body"
-                      value={newAch.organization}
-                      onChange={e => setNewAch({ ...newAch, organization: e.target.value })}
-                      className="px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
-                    />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Description of honor or significance"
-                    value={newAch.description}
-                    onChange={e => setNewAch({ ...newAch, description: e.target.value })}
-                    className="w-full px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
-                  />
-                  <div className="flex justify-end gap-2 pt-1">
-                    <button
-                      type="button"
-                      onClick={() => setIsAdding(false)}
-                      className="px-3 py-1.5 text-xs text-neutral-600 hover:text-neutral-900"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-4 py-1.5 text-xs font-semibold bg-[#A51C30] text-white rounded-md"
-                    >
-                      Save Award
-                    </button>
-                  </div>
-                </form>
-              )}
-
-              <div className="space-y-2">
-                {student.achievements.map(a => (
-                  <div key={a.id} className="p-3.5 border border-neutral-200 rounded-xl bg-white flex items-center justify-between">
-                    <div>
-                      <h4 className="text-xs font-bold text-neutral-900">{a.title}</h4>
-                      <p className="text-[11px] text-neutral-500">{a.organization} ({a.year})</p>
-                      <p className="text-xs text-neutral-600 mt-1">{a.description}</p>
+                  ) : (
+                    <div className="p-4 border-2 border-dashed border-neutral-300 rounded-lg text-center space-y-2">
+                      <p className="text-xs text-neutral-500">
+                        No official result slip attached yet. Upload your university transcript or semester results.
+                      </p>
+                      <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+                        <label className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-[#A51C30] hover:bg-[#8B1727] text-white rounded-md cursor-pointer transition-colors shadow-2xs">
+                          <Upload className="w-3.5 h-3.5" />
+                          <span>Upload Result Slip</span>
+                          <input
+                            type="file"
+                            accept="image/*,.pdf"
+                            onChange={handleResultSlipUpload}
+                            className="hidden"
+                          />
+                        </label>
+                        <button
+                          type="button"
+                          onClick={handleUseSampleResultSlip}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-md cursor-pointer transition-colors"
+                        >
+                          Use Official Sample Slip
+                        </button>
+                      </div>
                     </div>
-                    <button
-                      onClick={() => removeAchievement(a.id)}
-                      className="text-neutral-400 hover:text-red-600 p-1"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+                  )}
+                </div>
 
-          {/* SECTION: LEADERSHIP */}
-          {sectionId === 'leadership' && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-neutral-600">
-                  {student.leadership.length} Leadership Roles
-                </span>
-                {!isAdding && (
-                  <button
-                    onClick={() => setIsAdding(true)}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold bg-neutral-900 text-white rounded-lg hover:bg-neutral-800"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    Add Role
-                  </button>
-                )}
-              </div>
-
-              {isAdding && (
-                <form onSubmit={handleAddLead} className="p-4 bg-neutral-50 border border-neutral-200 rounded-xl space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
-                    <input
-                      type="text"
-                      placeholder="Role (e.g. Student Representative)"
-                      value={newLead.role}
-                      onChange={e => setNewLead({ ...newLead, role: e.target.value })}
-                      required
-                      className="px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Organization or Club"
-                      value={newLead.organization}
-                      onChange={e => setNewLead({ ...newLead, organization: e.target.value })}
-                      className="px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
-                    />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Responsibilities & Community Impact"
-                    value={newLead.description}
-                    onChange={e => setNewLead({ ...newLead, description: e.target.value })}
-                    className="w-full px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
-                  />
-                  <div className="flex justify-end gap-2 pt-1">
+                {/* Individual Courses List */}
+                <div className="flex items-center justify-between pt-2">
+                  <span className="text-xs font-semibold text-neutral-600">
+                    {student.courses.length} Course records · Cumulative GPA: {student.gpa}
+                  </span>
+                  {!isAdding && (
                     <button
-                      type="button"
-                      onClick={() => setIsAdding(false)}
-                      className="px-3 py-1.5 text-xs text-neutral-600 hover:text-neutral-900"
+                      onClick={() => setIsAdding(true)}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 cursor-pointer"
                     >
-                      Cancel
+                      <Plus className="w-3.5 h-3.5" />
+                      Add Course
                     </button>
-                    <button
-                      type="submit"
-                      className="px-4 py-1.5 text-xs font-semibold bg-[#A51C30] text-white rounded-md"
-                    >
-                      Save Role
-                    </button>
-                  </div>
-                </form>
-              )}
+                  )}
+                </div>
 
-              <div className="space-y-2">
-                {student.leadership.map(l => (
-                  <div key={l.id} className="p-3.5 border border-neutral-200 rounded-xl bg-white flex items-center justify-between">
-                    <div>
-                      <h4 className="text-xs font-bold text-neutral-900">{l.role} · {l.organization}</h4>
-                      <p className="text-xs text-neutral-600 mt-1">{l.description}</p>
+                {isAdding && (
+                  <form onSubmit={handleAddCourse} className="p-4 bg-neutral-50 border border-neutral-200 rounded-xl space-y-3">
+                    <h4 className="text-xs font-bold text-neutral-900 uppercase tracking-wide">New Course Record</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <input
+                        type="text"
+                        placeholder="Course Code (e.g. CSC 301)"
+                        value={newCourse.code}
+                        onChange={e => setNewCourse({ ...newCourse, code: e.target.value })}
+                        required
+                        className="px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Course Title"
+                        value={newCourse.title}
+                        onChange={e => setNewCourse({ ...newCourse, title: e.target.value })}
+                        required
+                        className="px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
+                      />
                     </div>
-                    <button
-                      onClick={() => removeLeadership(l.id)}
-                      className="text-neutral-400 hover:text-red-600 p-1"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ))}
+                    <div className="grid grid-cols-3 gap-3">
+                      <select
+                        value={newCourse.grade}
+                        onChange={e => setNewCourse({ ...newCourse, grade: e.target.value })}
+                        className="px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
+                      >
+                        {['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'Pass'].map(g => (
+                          <option key={g} value={g}>Grade: {g}</option>
+                        ))}
+                      </select>
+                      <input
+                        type="number"
+                        placeholder="Credits (e.g. 4)"
+                        value={newCourse.credits}
+                        onChange={e => setNewCourse({ ...newCourse, credits: Number(e.target.value) })}
+                        className="px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Semester"
+                        value={newCourse.semester}
+                        onChange={e => setNewCourse({ ...newCourse, semester: e.target.value })}
+                        className="px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
+                      />
+                    </div>
+                    <div className="flex justify-end gap-2 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => setIsAdding(false)}
+                        className="px-3 py-1.5 text-xs text-neutral-600 hover:text-neutral-900 cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-4 py-1.5 text-xs font-semibold bg-[#A51C30] text-white rounded-md cursor-pointer"
+                      >
+                        Save Course
+                      </button>
+                    </div>
+                  </form>
+                )}
+
+                <div className="divide-y divide-neutral-100 border border-neutral-200 rounded-xl overflow-hidden bg-white">
+                  {student.courses.map((course) => (
+                    <div key={course.id} className="p-3.5 flex items-center justify-between hover:bg-neutral-50/60 transition-colors">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-xs text-neutral-900">{course.code}</span>
+                          <span className="text-xs text-neutral-600">· {course.title}</span>
+                        </div>
+                        <div className="text-[11px] text-neutral-400 mt-0.5">
+                          {course.semester} · {course.credits} Credits
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-neutral-100 text-[#A51C30] border border-neutral-200">
+                          Grade {course.grade}
+                        </span>
+                        <button
+                          onClick={() => removeCourse(course.id)}
+                          className="text-neutral-400 hover:text-red-600 p-1 rounded-md transition-colors cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+
+            {/* SECTION: SKILLS */}
+            {sectionId === 'skills' && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-neutral-600">
+                    {student.skills.length} Skills Listed
+                  </span>
+                  {!isAdding && (
+                    <button
+                      onClick={() => setIsAdding(true)}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      Add Skill
+                    </button>
+                  )}
+                </div>
+
+                {isAdding && (
+                  <form onSubmit={handleAddSkill} className="p-4 bg-neutral-50 border border-neutral-200 rounded-xl space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <input
+                        type="text"
+                        placeholder="Skill name (e.g. Python, SQL)"
+                        value={newSkill.name}
+                        onChange={e => setNewSkill({ ...newSkill, name: e.target.value })}
+                        required
+                        className="px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
+                      />
+                      <select
+                        value={newSkill.category}
+                        onChange={e => setNewSkill({ ...newSkill, category: e.target.value as any })}
+                        className="px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
+                      >
+                        <option value="Technical">Technical</option>
+                        <option value="Soft">Soft Skill</option>
+                        <option value="Domain">Domain Knowledge</option>
+                      </select>
+                    </div>
+                    <div className="flex justify-end gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => setIsAdding(false)}
+                        className="px-3 py-1.5 text-xs text-neutral-600 hover:text-neutral-900 cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-4 py-1.5 text-xs font-semibold bg-[#A51C30] text-white rounded-md cursor-pointer"
+                      >
+                        Save Skill
+                      </button>
+                    </div>
+                  </form>
+                )}
+
+                <div className="flex flex-wrap gap-2">
+                  {student.skills.map((skill) => (
+                    <div
+                      key={skill.id}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-neutral-100 hover:bg-neutral-200/80 rounded-lg border border-neutral-200 text-xs text-neutral-800"
+                    >
+                      <span className="font-medium">{skill.name}</span>
+                      <span className="text-[10px] text-neutral-400">({skill.category})</span>
+                      <button
+                        onClick={() => removeSkill(skill.id)}
+                        className="text-neutral-400 hover:text-red-600 transition-colors cursor-pointer"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* SECTION: PROJECTS WITH IMAGE ATTACHMENT */}
+            {sectionId === 'projects' && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-neutral-600">
+                    {student.projects.length} Project Records
+                  </span>
+                  {!isAdding && (
+                    <button
+                      onClick={() => setIsAdding(true)}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      Add Project
+                    </button>
+                  )}
+                </div>
+
+                {isAdding && (
+                  <form onSubmit={handleAddProject} className="p-4 bg-neutral-50 border border-neutral-200 rounded-xl space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <input
+                        type="text"
+                        placeholder="Project Title"
+                        value={newProject.title}
+                        onChange={e => setNewProject({ ...newProject, title: e.target.value })}
+                        required
+                        className="px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Role (e.g. Lead Developer)"
+                        value={newProject.role}
+                        onChange={e => setNewProject({ ...newProject, role: e.target.value })}
+                        className="px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
+                      />
+                    </div>
+                    <textarea
+                      rows={3}
+                      placeholder="Brief description of the project and impact..."
+                      value={newProject.description}
+                      onChange={e => setNewProject({ ...newProject, description: e.target.value })}
+                      className="w-full px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Technologies (comma separated: React, Python, Docker)"
+                      value={newProject.technologies}
+                      onChange={e => setNewProject({ ...newProject, technologies: e.target.value })}
+                      className="w-full px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
+                    />
+
+                    {/* Project Screenshot upload */}
+                    <div className="flex items-center gap-3 pt-1">
+                      <label className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-white border border-neutral-300 rounded-md cursor-pointer hover:bg-neutral-50">
+                        <ImageIcon className="w-3.5 h-3.5 text-[#A51C30]" />
+                        <span>Attach Project Screenshot</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={e => handleFileUpload(e, base64 => setNewProject({ ...newProject, imageUrl: base64 }))}
+                          className="hidden"
+                        />
+                      </label>
+                      {newProject.imageUrl && (
+                        <span className="text-xs text-emerald-600 font-semibold">✓ Image attached</span>
+                      )}
+                    </div>
+
+                    <div className="flex justify-end gap-2 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => setIsAdding(false)}
+                        className="px-3 py-1.5 text-xs text-neutral-600 hover:text-neutral-900 cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-4 py-1.5 text-xs font-semibold bg-[#A51C30] text-white rounded-md cursor-pointer"
+                      >
+                        Save Project
+                      </button>
+                    </div>
+                  </form>
+                )}
+
+                <div className="space-y-3">
+                  {student.projects.map((proj) => (
+                    <div key={proj.id} className="p-4 border border-neutral-200 rounded-xl bg-white hover:border-neutral-300 transition-colors">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start gap-3">
+                          {proj.imageUrl && (
+                            <button
+                              type="button"
+                              onClick={() => setLightbox({
+                                isOpen: true,
+                                imageUrl: proj.imageUrl || null,
+                                title: proj.title,
+                                subtitle: `${proj.role} · Project Preview`,
+                              })}
+                              className="w-14 h-14 rounded-lg overflow-hidden border border-neutral-300 shrink-0 group relative cursor-pointer"
+                            >
+                              <img src={proj.imageUrl} alt={proj.title} className="w-full h-full object-cover" />
+                              <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white">
+                                <Eye className="w-4 h-4" />
+                              </div>
+                            </button>
+                          )}
+                          <div>
+                            <h4 className="text-sm font-bold text-neutral-900">{proj.title}</h4>
+                            <div className="text-xs text-[#A51C30] font-medium mt-0.5">{proj.role}</div>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => removeProject(proj.id)}
+                          className="text-neutral-400 hover:text-red-600 p-1 transition-colors cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                      <p className="text-xs text-neutral-600 mt-2 leading-relaxed">{proj.description}</p>
+                      {proj.technologies.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mt-3">
+                          {proj.technologies.map(t => (
+                            <span key={t} className="px-2 py-0.5 rounded text-[10px] font-medium bg-neutral-100 text-neutral-700">
+                              {t}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* SECTION: CERTIFICATIONS WITH IMAGE ATTACHMENT */}
+            {sectionId === 'certifications' && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-neutral-600">
+                    {student.certifications.length} Certifications &amp; Credentials
+                  </span>
+                  {!isAdding && (
+                    <button
+                      onClick={() => setIsAdding(true)}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      Add Certificate
+                    </button>
+                  )}
+                </div>
+
+                {isAdding && (
+                  <form onSubmit={handleAddCert} className="p-4 bg-neutral-50 border border-neutral-200 rounded-xl space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <input
+                        type="text"
+                        placeholder="Certificate Title"
+                        value={newCert.title}
+                        onChange={e => setNewCert({ ...newCert, title: e.target.value })}
+                        required
+                        className="px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Issuing Organization"
+                        value={newCert.issuer}
+                        onChange={e => setNewCert({ ...newCert, issuer: e.target.value })}
+                        required
+                        className="px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <input
+                        type="text"
+                        placeholder="Issue Date (e.g. Jan 2026)"
+                        value={newCert.issueDate}
+                        onChange={e => setNewCert({ ...newCert, issueDate: e.target.value })}
+                        className="px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Credential ID"
+                        value={newCert.credentialId}
+                        onChange={e => setNewCert({ ...newCert, credentialId: e.target.value })}
+                        className="px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
+                      />
+                    </div>
+
+                    {/* Certificate Image Upload */}
+                    <div className="flex items-center gap-3 pt-1">
+                      <label className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-white border border-neutral-300 rounded-md cursor-pointer hover:bg-neutral-50">
+                        <ImageIcon className="w-3.5 h-3.5 text-[#A51C30]" />
+                        <span>Upload Certificate Image</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={e => handleFileUpload(e, base64 => setNewCert({ ...newCert, imageUrl: base64 }))}
+                          className="hidden"
+                        />
+                      </label>
+                      {newCert.imageUrl && (
+                        <span className="text-xs text-emerald-600 font-semibold">✓ Certificate image attached</span>
+                      )}
+                    </div>
+
+                    <div className="flex justify-end gap-2 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => setIsAdding(false)}
+                        className="px-3 py-1.5 text-xs text-neutral-600 hover:text-neutral-900 cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-4 py-1.5 text-xs font-semibold bg-[#A51C30] text-white rounded-md cursor-pointer"
+                      >
+                        Save Certificate
+                      </button>
+                    </div>
+                  </form>
+                )}
+
+                <div className="space-y-3">
+                  {student.certifications.map(c => (
+                    <div key={c.id} className="p-3.5 border border-neutral-200 rounded-xl bg-white flex items-center justify-between hover:border-neutral-300 transition-colors">
+                      <div className="flex items-center gap-3.5">
+                        {c.imageUrl ? (
+                          <button
+                            type="button"
+                            onClick={() => setLightbox({
+                              isOpen: true,
+                              imageUrl: c.imageUrl || null,
+                              title: c.title,
+                              subtitle: `${c.issuer} · Credential ID: ${c.credentialId || 'Verified'}`,
+                            })}
+                            className="w-12 h-12 rounded-lg overflow-hidden border border-neutral-300 shrink-0 group relative cursor-pointer"
+                            title="Click to view full certificate"
+                          >
+                            <img src={c.imageUrl} alt={c.title} className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white">
+                              <Eye className="w-4 h-4" />
+                            </div>
+                          </button>
+                        ) : (
+                          <div className="w-12 h-12 rounded-lg bg-neutral-100 text-neutral-400 flex items-center justify-center shrink-0">
+                            <Award className="w-5 h-5 text-neutral-500" />
+                          </div>
+                        )}
+
+                        <div>
+                          <h4 className="text-xs font-bold text-neutral-900">{c.title}</h4>
+                          <p className="text-[11px] text-neutral-500">{c.issuer} · {c.issueDate}</p>
+                          {c.credentialId && (
+                            <p className="text-[10px] text-neutral-400 font-mono mt-0.5">ID: {c.credentialId}</p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        {c.imageUrl && (
+                          <button
+                            type="button"
+                            onClick={() => setLightbox({
+                              isOpen: true,
+                              imageUrl: c.imageUrl || null,
+                              title: c.title,
+                              subtitle: `${c.issuer} · Credential ID: ${c.credentialId || 'Verified'}`,
+                            })}
+                            className="p-1.5 text-xs text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-md flex items-center gap-1 cursor-pointer"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            <span className="hidden sm:inline">View</span>
+                          </button>
+                        )}
+                        <button
+                          onClick={() => removeCertification(c.id)}
+                          className="text-neutral-400 hover:text-red-600 p-1 cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* SECTION: ACHIEVEMENTS WITH IMAGE ATTACHMENT */}
+            {sectionId === 'achievements' && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-neutral-600">
+                    {student.achievements.length} Achievements &amp; Honors
+                  </span>
+                  {!isAdding && (
+                    <button
+                      onClick={() => setIsAdding(true)}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      Add Award
+                    </button>
+                  )}
+                </div>
+
+                {isAdding && (
+                  <form onSubmit={handleAddAch} className="p-4 bg-neutral-50 border border-neutral-200 rounded-xl space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <input
+                        type="text"
+                        placeholder="Award or Honor Title"
+                        value={newAch.title}
+                        onChange={e => setNewAch({ ...newAch, title: e.target.value })}
+                        required
+                        className="px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Awarding Body"
+                        value={newAch.organization}
+                        onChange={e => setNewAch({ ...newAch, organization: e.target.value })}
+                        className="px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
+                      />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Description of honor or significance"
+                      value={newAch.description}
+                      onChange={e => setNewAch({ ...newAch, description: e.target.value })}
+                      className="w-full px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
+                    />
+
+                    {/* Award certificate upload */}
+                    <div className="flex items-center gap-3 pt-1">
+                      <label className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-white border border-neutral-300 rounded-md cursor-pointer hover:bg-neutral-50">
+                        <ImageIcon className="w-3.5 h-3.5 text-[#A51C30]" />
+                        <span>Upload Award Certificate / Photo</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={e => handleFileUpload(e, base64 => setNewAch({ ...newAch, imageUrl: base64 }))}
+                          className="hidden"
+                        />
+                      </label>
+                      {newAch.imageUrl && (
+                        <span className="text-xs text-emerald-600 font-semibold">✓ Award document attached</span>
+                      )}
+                    </div>
+
+                    <div className="flex justify-end gap-2 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => setIsAdding(false)}
+                        className="px-3 py-1.5 text-xs text-neutral-600 hover:text-neutral-900 cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-4 py-1.5 text-xs font-semibold bg-[#A51C30] text-white rounded-md cursor-pointer"
+                      >
+                        Save Award
+                      </button>
+                    </div>
+                  </form>
+                )}
+
+                <div className="space-y-3">
+                  {student.achievements.map(a => (
+                    <div key={a.id} className="p-3.5 border border-neutral-200 rounded-xl bg-white flex items-center justify-between hover:border-neutral-300 transition-colors">
+                      <div className="flex items-center gap-3.5">
+                        {a.imageUrl ? (
+                          <button
+                            type="button"
+                            onClick={() => setLightbox({
+                              isOpen: true,
+                              imageUrl: a.imageUrl || null,
+                              title: a.title,
+                              subtitle: `${a.organization} (${a.year})`,
+                            })}
+                            className="w-12 h-12 rounded-lg overflow-hidden border border-neutral-300 shrink-0 group relative cursor-pointer"
+                            title="Click to view full award"
+                          >
+                            <img src={a.imageUrl} alt={a.title} className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white">
+                              <Eye className="w-4 h-4" />
+                            </div>
+                          </button>
+                        ) : (
+                          <div className="w-12 h-12 rounded-lg bg-neutral-100 text-neutral-400 flex items-center justify-center shrink-0">
+                            <Trophy className="w-5 h-5 text-neutral-500" />
+                          </div>
+                        )}
+
+                        <div>
+                          <h4 className="text-xs font-bold text-neutral-900">{a.title}</h4>
+                          <p className="text-[11px] text-neutral-500">{a.organization} ({a.year})</p>
+                          <p className="text-xs text-neutral-600 mt-1">{a.description}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        {a.imageUrl && (
+                          <button
+                            type="button"
+                            onClick={() => setLightbox({
+                              isOpen: true,
+                              imageUrl: a.imageUrl || null,
+                              title: a.title,
+                              subtitle: `${a.organization} (${a.year})`,
+                            })}
+                            className="p-1.5 text-xs text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-md flex items-center gap-1 cursor-pointer"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            <span className="hidden sm:inline">View</span>
+                          </button>
+                        )}
+                        <button
+                          onClick={() => removeAchievement(a.id)}
+                          className="text-neutral-400 hover:text-red-600 p-1 cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* SECTION: LEADERSHIP */}
+            {sectionId === 'leadership' && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-neutral-600">
+                    {student.leadership.length} Leadership Roles
+                  </span>
+                  {!isAdding && (
+                    <button
+                      onClick={() => setIsAdding(true)}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      Add Role
+                    </button>
+                  )}
+                </div>
+
+                {isAdding && (
+                  <form onSubmit={handleAddLead} className="p-4 bg-neutral-50 border border-neutral-200 rounded-xl space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <input
+                        type="text"
+                        placeholder="Role (e.g. Student Representative)"
+                        value={newLead.role}
+                        onChange={e => setNewLead({ ...newLead, role: e.target.value })}
+                        required
+                        className="px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Organization or Club"
+                        value={newLead.organization}
+                        onChange={e => setNewLead({ ...newLead, organization: e.target.value })}
+                        className="px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
+                      />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Responsibilities & Community Impact"
+                      value={newLead.description}
+                      onChange={e => setNewLead({ ...newLead, description: e.target.value })}
+                      className="w-full px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"
+                    />
+                    <div className="flex justify-end gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => setIsAdding(false)}
+                        className="px-3 py-1.5 text-xs text-neutral-600 hover:text-neutral-900 cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-4 py-1.5 text-xs font-semibold bg-[#A51C30] text-white rounded-md cursor-pointer"
+                      >
+                        Save Role
+                      </button>
+                    </div>
+                  </form>
+                )}
+
+                <div className="space-y-2">
+                  {student.leadership.map(l => (
+                    <div key={l.id} className="p-3.5 border border-neutral-200 rounded-xl bg-white flex items-center justify-between">
+                      <div>
+                        <h4 className="text-xs font-bold text-neutral-900">{l.role} · {l.organization}</h4>
+                        <p className="text-xs text-neutral-600 mt-1">{l.description}</p>
+                      </div>
+                      <button
+                        onClick={() => removeLeadership(l.id)}
+                        className="text-neutral-400 hover:text-red-600 p-1 cursor-pointer"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+          </div>
 
         </div>
-
       </div>
-    </div>
+
+      {/* Lightbox for previewing any document/certificate/result slip */}
+      <ImageLightboxModal
+        isOpen={lightbox.isOpen}
+        onClose={() => setLightbox({ ...lightbox, isOpen: false })}
+        imageUrl={lightbox.imageUrl}
+        title={lightbox.title}
+        subtitle={lightbox.subtitle}
+      />
+    </>
   );
 };

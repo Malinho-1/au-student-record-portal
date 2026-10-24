@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { EditProfileModal } from './EditProfileModal';
 import { SectionDetailModal } from './SectionDetailModal';
+import { ImageLightboxModal } from '../common/ImageLightboxModal';
 import { 
   FileText, 
   BookOpen, 
@@ -13,13 +14,28 @@ import {
   Pencil, 
   ChevronRight, 
   ArrowRight,
-  Sparkles
+  Sparkles,
+  FileCheck2,
+  Camera
 } from 'lucide-react';
+
 
 export const StudentOverview: React.FC = () => {
   const { student, setActiveStudentTab } = useApp();
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [activeModalSection, setActiveModalSection] = useState<string | null>(null);
+
+  // Lightbox preview for result slip or attachments
+  const [lightbox, setLightbox] = useState<{
+    isOpen: boolean;
+    imageUrl: string | null;
+    title: string;
+    subtitle?: string;
+  }>({
+    isOpen: false,
+    imageUrl: null,
+    title: '',
+  });
 
   // Cards data
   const cards = [
@@ -31,6 +47,7 @@ export const StudentOverview: React.FC = () => {
         ? (student.aboutMe.slice(0, 85) + '...') 
         : 'Add a short introduction describing your academic interests, goals, and the work you are most proud of.',
       icon: FileText,
+      badge: undefined,
     },
     {
       id: 'courses',
@@ -38,6 +55,7 @@ export const StudentOverview: React.FC = () => {
       title: 'Courses & results',
       desc: `${student.courses.length} courses · Overall GPA ${student.gpa || '3.84'}`,
       icon: BookOpen,
+      badge: student.resultSlipUrl ? 'Result Slip Attached' : undefined,
     },
     {
       id: 'skills',
@@ -47,6 +65,7 @@ export const StudentOverview: React.FC = () => {
         ? student.skills.slice(0, 3).map(s => s.name).join(' · ') 
         : 'Skill One · Skill Two · Skill Three',
       icon: Star,
+      badge: undefined,
     },
     {
       id: 'projects',
@@ -54,6 +73,7 @@ export const StudentOverview: React.FC = () => {
       title: 'Projects',
       desc: student.projects[0]?.title || 'No project record added yet.',
       icon: Briefcase,
+      badge: student.projects.some(p => p.imageUrl) ? 'Preview Image' : undefined,
     },
     {
       id: 'certifications',
@@ -61,6 +81,7 @@ export const StudentOverview: React.FC = () => {
       title: 'Certifications',
       desc: student.certifications[0]?.title || 'No certificate record added yet.',
       icon: Award,
+      badge: student.certifications.some(c => c.imageUrl) ? 'Certificate Image' : undefined,
     },
     {
       id: 'achievements',
@@ -68,6 +89,7 @@ export const StudentOverview: React.FC = () => {
       title: 'Achievements',
       desc: student.achievements[0]?.title || 'Achievement or Award',
       icon: Trophy,
+      badge: student.achievements.some(a => a.imageUrl) ? 'Award Proof' : undefined,
     },
   ];
 
@@ -86,9 +108,20 @@ export const StudentOverview: React.FC = () => {
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
             <div className="flex items-center gap-5">
-              {/* Circular Avatar */}
-              <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-full border-2 border-neutral-600 bg-neutral-800 flex items-center justify-center text-neutral-300 font-semibold text-xl shrink-0">
-                {student.fullName.split(' ').map(n => n[0]).join('')}
+              {/* Circular Avatar with custom photo or initials */}
+              <div 
+                onClick={() => setIsEditProfileOpen(true)}
+                className="w-18 h-18 sm:w-20 sm:h-20 rounded-full border-2 border-neutral-600 bg-neutral-800 flex items-center justify-center text-neutral-300 font-semibold text-xl shrink-0 overflow-hidden relative group cursor-pointer"
+                title="Click to edit profile or upload photo"
+              >
+                {student.avatarUrl ? (
+                  <img src={student.avatarUrl} alt={student.fullName} className="w-full h-full object-cover" />
+                ) : (
+                  <span>{student.fullName.split(' ').map((n: string) => n[0]).join('')}</span>
+                )}
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white text-xs">
+                  <Camera className="w-5 h-5" />
+                </div>
               </div>
 
               {/* Title & Metadata */}
@@ -99,10 +132,12 @@ export const StudentOverview: React.FC = () => {
                 <p className="text-neutral-300 text-sm font-medium mt-1">
                   {student.programme}
                 </p>
-                <div className="text-xs text-neutral-400 mt-1 flex items-center gap-2">
+                <div className="text-xs text-neutral-400 mt-1 flex flex-wrap items-center gap-2">
                   <span>{student.yearOfStudy}</span>
                   <span>·</span>
                   <span>{student.faculty}</span>
+                  <span>·</span>
+                  <span className="font-semibold text-red-300">GPA {student.gpa}</span>
                 </div>
               </div>
             </div>
@@ -113,6 +148,22 @@ export const StudentOverview: React.FC = () => {
                 <Check className="w-3.5 h-3.5" />
                 <span>{student.academicStanding}</span>
               </div>
+
+              {student.resultSlipUrl && (
+                <button
+                  onClick={() => setLightbox({
+                    isOpen: true,
+                    imageUrl: student.resultSlipUrl || null,
+                    title: 'Official Africa University Result Slip',
+                    subtitle: `${student.fullName} · ${student.programme}`,
+                  })}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-950/60 border border-red-700/60 text-red-300 text-xs font-medium hover:bg-red-900/60 transition-colors cursor-pointer"
+                  title="View official result slip"
+                >
+                  <FileCheck2 className="w-3.5 h-3.5" />
+                  <span>View Result Slip</span>
+                </button>
+              )}
 
               <button
                 onClick={() => setIsEditProfileOpen(true)}
@@ -137,7 +188,7 @@ export const StudentOverview: React.FC = () => {
               Everything a lecturer needs, organised.
             </h2>
             <p className="text-neutral-500 text-sm mt-1">
-              Select any section to view or update it without cluttering your main profile.
+              Select any section to view or update documents, results slips, and certificates without cluttering your main profile.
             </p>
           </div>
         </div>
@@ -157,8 +208,15 @@ export const StudentOverview: React.FC = () => {
                     <Icon className="w-5 h-5" />
                   </div>
                   <div>
-                    <div className="text-[10px] font-bold tracking-wider uppercase text-neutral-400 mb-1">
-                      {card.tag}
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[10px] font-bold tracking-wider uppercase text-neutral-400">
+                        {card.tag}
+                      </span>
+                      {card.badge && (
+                        <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          {card.badge}
+                        </span>
+                      )}
                     </div>
                     <h3 className="text-base font-bold text-neutral-900 group-hover:text-[#A51C30] transition-colors">
                       {card.title}
@@ -189,7 +247,7 @@ export const StudentOverview: React.FC = () => {
               Build a complete academic story.
             </h4>
             <p className="text-xs text-neutral-600">
-              Your verified records empower referees to craft compelling recommendation letters.
+              Your verified records and uploaded result slips empower referees to craft accurate recommendation letters.
             </p>
           </div>
         </div>
@@ -212,6 +270,14 @@ export const StudentOverview: React.FC = () => {
       <SectionDetailModal
         sectionId={activeModalSection}
         onClose={() => setActiveModalSection(null)}
+      />
+
+      <ImageLightboxModal
+        isOpen={lightbox.isOpen}
+        onClose={() => setLightbox({ ...lightbox, isOpen: false })}
+        imageUrl={lightbox.imageUrl}
+        title={lightbox.title}
+        subtitle={lightbox.subtitle}
       />
 
     </div>

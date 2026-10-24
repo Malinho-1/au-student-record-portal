@@ -1,4 +1,5 @@
 import type { StudentProfile, RecommendationRequest, Lecturer } from '../types';
+import { SAMPLE_RESULT_SLIP, SAMPLE_CERTIFICATE_AWS, SAMPLE_CERTIFICATE_DEANS } from './sampleDocuments';
 
 export const initialStudent: StudentProfile = {
   id: 'stu-au-2023-0492',
@@ -11,6 +12,9 @@ export const initialStudent: StudentProfile = {
   gpa: '3.84',
   academicStanding: 'Good Standing · Dean\'s List',
   aboutMe: 'Passionate computer science undergraduate with deep interest in web applications, distributed systems, and educational tech. Proven track record of consistent high academic performance and collaborative project leadership.',
+  resultSlipUrl: SAMPLE_RESULT_SLIP,
+  resultSlipName: 'AU_Official_Result_Slip_Semester1_2026.pdf',
+  resultSlipUploadedAt: '2026-10-18',
   courses: [
     {
       id: 'c-1',
@@ -54,7 +58,8 @@ export const initialStudent: StudentProfile = {
       title: 'AWS Certified Cloud Practitioner',
       issuer: 'Amazon Web Services',
       issueDate: 'Jan 2026',
-      credentialId: 'AWS-AU-99214'
+      credentialId: 'AWS-AU-99214',
+      imageUrl: SAMPLE_CERTIFICATE_AWS
     }
   ],
   achievements: [
@@ -63,7 +68,8 @@ export const initialStudent: StudentProfile = {
       title: 'Dean\'s Academic Honor List',
       organization: 'Africa University Faculty of Engineering',
       year: '2025 - 2026',
-      description: 'Awarded for maintaining a semester GPA in the top 5% of the Computer Science cohort.'
+      description: 'Awarded for maintaining a semester GPA in the top 5% of the Computer Science cohort.',
+      imageUrl: SAMPLE_CERTIFICATE_DEANS
     }
   ],
   leadership: [
@@ -119,6 +125,7 @@ export const initialRequests: RecommendationRequest[] = [
     shortNote: 'Applying for a Software Engineering Internship at EcoCash Holdings. I would appreciate if you could highlight my performance in CSC 301 (Advanced Web & Enterprise Systems) and my dedication to team project delivery.',
     status: 'Pending',
     submittedAt: '2026-10-22',
+    resultSlipUrl: SAMPLE_RESULT_SLIP,
     relevantCourses: [
       {
         code: 'CSC 301',
@@ -133,3 +140,4 @@ export const initialRequests: RecommendationRequest[] = [
     ]
   }
 ];
+

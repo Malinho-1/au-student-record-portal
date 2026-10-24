@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import type { RequestStatus } from '../../types';
 import { LetterGeneratorModal } from './LetterGeneratorModal';
+import { ImageLightboxModal } from '../common/ImageLightboxModal';
 import { 
   BookOpen, 
   Check, 
   ArrowRight, 
-  Inbox
+  Inbox,
+  FileCheck2
 } from 'lucide-react';
 
 
@@ -15,10 +17,23 @@ export const LecturerPortal: React.FC = () => {
     requests, 
     selectedRequestId, 
     setSelectedRequestId, 
-    updateRequestStatus 
+    updateRequestStatus,
+    student 
   } = useApp();
 
   const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
+
+  // Lightbox preview for result slip
+  const [lightbox, setLightbox] = useState<{
+    isOpen: boolean;
+    imageUrl: string | null;
+    title: string;
+    subtitle?: string;
+  }>({
+    isOpen: false,
+    imageUrl: null,
+    title: '',
+  });
 
   // Find currently selected request
   const selectedRequest = requests.find(r => r.id === selectedRequestId) || requests[0];
@@ -39,6 +54,8 @@ export const LecturerPortal: React.FC = () => {
         return 'bg-neutral-100 text-neutral-600 border-neutral-200';
     }
   };
+
+  const currentResultSlip = selectedRequest?.resultSlipUrl || student.resultSlipUrl;
 
   return (
     <div className="flex-1 p-6 sm:p-10 lg:p-12 overflow-y-auto bg-[#F8F7F5]">
@@ -95,7 +112,7 @@ export const LecturerPortal: React.FC = () => {
               <div className="divide-y divide-neutral-100 max-h-[550px] overflow-y-auto">
                 {requests.map((req) => {
                   const isSelected = selectedRequest?.id === req.id;
-                  const initials = req.studentName.split(' ').map(n => n[0]).join('');
+                  const initials = req.studentName.split(' ').map((n: string) => n[0]).join('');
 
                   return (
                     <button
@@ -142,11 +159,11 @@ export const LecturerPortal: React.FC = () => {
             {selectedRequest ? (
               <div className="bg-white rounded-2xl border border-neutral-200 shadow-xs p-6 sm:p-8 space-y-6">
                 
-                {/* Header: Student Info */}
-                <div className="flex items-start justify-between">
+                {/* Header: Student Info & Attached Documents Alert */}
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-full bg-neutral-900 text-white font-bold text-sm flex items-center justify-center shrink-0">
-                      {selectedRequest.studentName.split(' ').map(n => n[0]).join('')}
+                      {selectedRequest.studentName.split(' ').map((n: string) => n[0]).join('')}
                     </div>
                     <div>
                       <div className="text-[10px] font-bold tracking-[0.16em] uppercase text-neutral-400">
@@ -160,6 +177,23 @@ export const LecturerPortal: React.FC = () => {
                       </p>
                     </div>
                   </div>
+
+                  {currentResultSlip && (
+                    <button
+                      type="button"
+                      onClick={() => setLightbox({
+                        isOpen: true,
+                        imageUrl: currentResultSlip,
+                        title: 'Official Africa University Result Slip',
+                        subtitle: `${selectedRequest.studentName} · Attached Verification`,
+                      })}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#FAF0F1] hover:bg-[#F3D6D9] text-[#A51C30] border border-[#FCA5A5] text-xs font-semibold transition-colors cursor-pointer self-start"
+                      title="Inspect student's official result slip"
+                    >
+                      <FileCheck2 className="w-4 h-4" />
+                      <span>View Official Result Slip</span>
+                    </button>
+                  )}
                 </div>
 
                 {/* 3-Column Metadata Row */}
@@ -281,6 +315,15 @@ export const LecturerPortal: React.FC = () => {
           onClose={() => setIsGeneratorOpen(false)}
         />
       )}
+
+      {/* Lightbox for inspecting Result Slip */}
+      <ImageLightboxModal
+        isOpen={lightbox.isOpen}
+        onClose={() => setLightbox({ ...lightbox, isOpen: false })}
+        imageUrl={lightbox.imageUrl}
+        title={lightbox.title}
+        subtitle={lightbox.subtitle}
+      />
 
     </div>
   );

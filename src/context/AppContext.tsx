@@ -234,8 +234,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       shortNote,
       status: 'Pending',
       submittedAt: new Date().toISOString().split('T')[0],
+      resultSlipUrl: student.resultSlipUrl,
       relevantCourses,
     };
+
 
     setRequests(prev => [newRequest, ...prev]);
     setSelectedRequestId(newRequest.id);

@@ -35,6 +35,7 @@ export interface Project {
   technologies: string[];
   link?: string;
   period: string;
+  imageUrl?: string;
 }
 
 export interface Certification {
@@ -44,6 +45,7 @@ export interface Certification {
   issueDate: string;
   credentialId?: string;
   credentialUrl?: string;
+  imageUrl?: string;
 }
 
 export interface Achievement {
@@ -52,6 +54,7 @@ export interface Achievement {
   organization: string;
   year: string;
   description: string;
+  imageUrl?: string;
 }
 
 export interface Leadership {
@@ -60,6 +63,7 @@ export interface Leadership {
   organization: string;
   duration: string;
   description: string;
+  imageUrl?: string;
 }
 
 export interface StudentProfile {
@@ -74,6 +78,9 @@ export interface StudentProfile {
   academicStanding: string;
   aboutMe: string;
   avatarUrl?: string;
+  resultSlipUrl?: string;
+  resultSlipName?: string;
+  resultSlipUploadedAt?: string;
   courses: Course[];
   skills: Skill[];
   projects: Project[];
@@ -81,6 +88,7 @@ export interface StudentProfile {
   achievements: Achievement[];
   leadership: Leadership[];
 }
+
 
 export interface RecommendationRequest {
   id: string;
@@ -96,6 +104,7 @@ export interface RecommendationRequest {
   shortNote: string;
   status: RequestStatus;
   submittedAt: string;
+  resultSlipUrl?: string;
   relevantCourses: {
     code: string;
     title: string;
@@ -103,6 +112,7 @@ export interface RecommendationRequest {
   }[];
   generatedLetter?: string;
 }
+
 
 export interface Lecturer {
   id: string;
