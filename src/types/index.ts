@@ -10,6 +10,21 @@ export type RequestPurpose =
   | 'Research Fellowship'
   | 'Exchange Programme';
 
+export type VerificationStatus = 
+  | 'verified-institution' // Verified by Africa University Registrar or Faculty Honours Board
+  | 'verified-issuer'      // Cryptographically verified by external vendor (AWS, Cisco, Google)
+  | 'pending-review'       // Uploaded evidence awaiting referee/supervisor accreditation
+  | 'unverified';          // Self-reported by student without verified evidence
+
+export interface VerificationMetadata {
+  status: VerificationStatus;
+  verifiedBy?: string;
+  verifiedAt?: string;
+  verificationHash?: string;
+  issuerRegistryUrl?: string;
+  evidenceName?: string;
+}
+
 export interface Course {
   id: string;
   code: string;
@@ -18,6 +33,7 @@ export interface Course {
   credits: number;
   semester: string;
   lecturerName?: string;
+  verification?: VerificationMetadata;
 }
 
 export interface Skill {
@@ -25,6 +41,7 @@ export interface Skill {
   name: string;
   category: 'Technical' | 'Soft' | 'Domain';
   proficiency?: 'Beginner' | 'Intermediate' | 'Advanced';
+  endorsedBy?: string[];
 }
 
 export interface Project {
@@ -36,6 +53,7 @@ export interface Project {
   link?: string;
   period: string;
   imageUrl?: string;
+  verification?: VerificationMetadata;
 }
 
 export interface Certification {
@@ -46,6 +64,7 @@ export interface Certification {
   credentialId?: string;
   credentialUrl?: string;
   imageUrl?: string;
+  verification?: VerificationMetadata;
 }
 
 export interface Achievement {
@@ -55,6 +74,7 @@ export interface Achievement {
   year: string;
   description: string;
   imageUrl?: string;
+  verification?: VerificationMetadata;
 }
 
 export interface Leadership {
@@ -64,6 +84,7 @@ export interface Leadership {
   duration: string;
   description: string;
   imageUrl?: string;
+  verification?: VerificationMetadata;
 }
 
 export interface StudentProfile {

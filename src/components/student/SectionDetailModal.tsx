@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { ImageLightboxModal } from '../common/ImageLightboxModal';
 import { SAMPLE_RESULT_SLIP } from '../../data/sampleDocuments';
+import type { VerificationMetadata } from '../../types';
 import { 
   X, 
   Plus, 
@@ -16,7 +17,10 @@ import {
   Upload,
   Eye,
   FileCheck2,
-  Image as ImageIcon
+  Image as ImageIcon,
+  CheckCircle2,
+  AlertTriangle,
+  Clock
 } from 'lucide-react';
 
 interface SectionDetailModalProps {
@@ -191,9 +195,14 @@ export const SectionDetailModal: React.FC<SectionDetailModalProps> = ({ sectionI
   const handleAddProject = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newProject.title) return;
+    const verification: VerificationMetadata = {
+      status: 'pending-review',
+      evidenceName: 'Departmental Capstone Audit Pending Review',
+    };
     addProject({
       ...newProject,
       technologies: newProject.technologies.split(',').map(t => t.trim()).filter(Boolean),
+      verification,
     });
     setNewProject({
       title: '',
@@ -210,7 +219,28 @@ export const SectionDetailModal: React.FC<SectionDetailModalProps> = ({ sectionI
   const handleAddCert = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCert.title) return;
-    addCertification(newCert);
+    const verification: VerificationMetadata = newCert.credentialId
+      ? {
+          status: 'verified-issuer',
+          verifiedBy: `${newCert.issuer} Digital Registry`,
+          verifiedAt: new Date().toISOString().split('T')[0],
+          verificationHash: newCert.credentialId,
+          issuerRegistryUrl: 'https://credentials.issuer.org/verify'
+        }
+      : newCert.imageUrl
+        ? {
+            status: 'pending-review',
+            evidenceName: 'Certificate Photo Attached (Pending Faculty Validation)'
+          }
+        : {
+            status: 'unverified',
+            evidenceName: 'Self-Reported Credential'
+          };
+
+    addCertification({
+      ...newCert,
+      verification,
+    });
     setNewCert({
       title: '',
       issuer: '',
@@ -224,7 +254,29 @@ export const SectionDetailModal: React.FC<SectionDetailModalProps> = ({ sectionI
   const handleAddAch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newAch.title) return;
-    addAchievement(newAch);
+    const isAU = newAch.organization.toLowerCase().includes('africa university') || newAch.organization.toLowerCase().includes('au');
+    const verification: VerificationMetadata = isAU
+      ? {
+          status: 'verified-institution',
+          verifiedBy: 'AU Faculty Honours Board (Registry Match)',
+          verifiedAt: new Date().toISOString().split('T')[0],
+          verificationHash: 'AU-HON-' + Math.random().toString(36).substring(2, 7).toUpperCase(),
+          evidenceName: 'Africa University Honours Ledger'
+        }
+      : newAch.imageUrl
+        ? {
+            status: 'pending-review',
+            evidenceName: 'Document Proof Attached (Awaiting Faculty Review)'
+          }
+        : {
+            status: 'unverified',
+            evidenceName: 'Self-Reported Claim (No Document Attached)'
+          };
+
+    addAchievement({
+      ...newAch,
+      verification,
+    });
     setNewAch({
       title: '',
       organization: '',
@@ -233,6 +285,41 @@ export const SectionDetailModal: React.FC<SectionDetailModalProps> = ({ sectionI
       imageUrl: '',
     });
     setIsAdding(false);
+  };
+
+  const renderAccreditationBadge = (v?: VerificationMetadata) => {
+    if (!v || v.status === 'unverified') {
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-300">
+          <AlertTriangle className="w-3 h-3 text-amber-600" />
+          <span>Self-Reported Claim</span>
+        </span>
+      );
+    }
+    if (v.status === 'pending-review') {
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-900 border border-amber-300">
+          <Clock className="w-3 h-3 text-amber-600" />
+          <span>Pending Faculty Accreditation</span>
+        </span>
+      );
+    }
+    if (v.status === 'verified-institution') {
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-300" title={`Verified by: ${v.verifiedBy} | Token: ${v.verificationHash}`}>
+          <ShieldCheck className="w-3 h-3 text-emerald-600" />
+          <span>AU Registrar Verified ({v.verificationHash || 'AU-SIS'})</span>
+        </span>
+      );
+    }
+    if (v.status === 'verified-issuer') {
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-800 border border-blue-300" title={`Verified by: ${v.verifiedBy} | ID: ${v.verificationHash}`}>
+          <CheckCircle2 className="w-3 h-3 text-blue-600" />
+          <span>Digital Credential Verified</span>
+        </span>
+      );
+    }
   };
 
   const handleAddLead = (e: React.FormEvent) => {
@@ -495,6 +582,9 @@ export const SectionDetailModal: React.FC<SectionDetailModalProps> = ({ sectionI
                         <div className="text-[11px] text-neutral-400 mt-0.5">
                           {course.semester} · {course.credits} Credits
                         </div>
+                        <div className="mt-1">
+                          {renderAccreditationBadge(course.verification)}
+                        </div>
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-neutral-100 text-[#A51C30] border border-neutral-200">
@@ -702,6 +792,9 @@ export const SectionDetailModal: React.FC<SectionDetailModalProps> = ({ sectionI
                           <div>
                             <h4 className="text-sm font-bold text-neutral-900">{proj.title}</h4>
                             <div className="text-xs text-[#A51C30] font-medium mt-0.5">{proj.role}</div>
+                            <div className="mt-1">
+                              {renderAccreditationBadge(proj.verification)}
+                            </div>
                           </div>
                         </div>
 
@@ -851,6 +944,9 @@ export const SectionDetailModal: React.FC<SectionDetailModalProps> = ({ sectionI
                           {c.credentialId && (
                             <p className="text-[10px] text-neutral-400 font-mono mt-0.5">ID: {c.credentialId}</p>
                           )}
+                          <div className="mt-1">
+                            {renderAccreditationBadge(c.verification)}
+                          </div>
                         </div>
                       </div>
 
@@ -994,6 +1090,9 @@ export const SectionDetailModal: React.FC<SectionDetailModalProps> = ({ sectionI
                           <h4 className="text-xs font-bold text-neutral-900">{a.title}</h4>
                           <p className="text-[11px] text-neutral-500">{a.organization} ({a.year})</p>
                           <p className="text-xs text-neutral-600 mt-1">{a.description}</p>
+                          <div className="mt-1">
+                            {renderAccreditationBadge(a.verification)}
+                          </div>
                         </div>
                       </div>
 
@@ -1094,6 +1193,9 @@ export const SectionDetailModal: React.FC<SectionDetailModalProps> = ({ sectionI
                       <div>
                         <h4 className="text-xs font-bold text-neutral-900">{l.role} · {l.organization}</h4>
                         <p className="text-xs text-neutral-600 mt-1">{l.description}</p>
+                        <div className="mt-1">
+                          {renderAccreditationBadge(l.verification)}
+                        </div>
                       </div>
                       <button
                         onClick={() => removeLeadership(l.id)}

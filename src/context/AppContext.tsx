@@ -5,6 +5,7 @@ import type {
   Lecturer, 
   UserRole,
   RequestStatus,
+  VerificationStatus,
   Course,
   Skill,
   Project,
@@ -25,9 +26,16 @@ interface AppContextType {
   selectedRequestId: string | null;
   setSelectedRequestId: (id: string | null) => void;
   recordCompleteness: number;
+  accreditationTrustScore: number;
   
   // Actions
   updateStudentProfile: (updates: Partial<StudentProfile>) => void;
+  accreditClaim: (
+    category: 'courses' | 'projects' | 'certifications' | 'achievements' | 'leadership',
+    itemId: string,
+    newStatus: VerificationStatus,
+    verifierName?: string
+  ) => void;
   addCourse: (course: Omit<Course, 'id'>) => void;
   removeCourse: (id: string) => void;
   addSkill: (skill: Omit<Skill, 'id'>) => void;
@@ -142,8 +150,51 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const recordCompleteness = calculateCompleteness();
 
+  const calculateAccreditationScore = (): number => {
+    const allItems = [
+      ...student.courses,
+      ...student.projects,
+      ...student.certifications,
+      ...student.achievements,
+      ...student.leadership,
+    ];
+    if (allItems.length === 0) return 100;
+    const verifiedCount = allItems.filter(
+      item => item.verification?.status === 'verified-institution' || item.verification?.status === 'verified-issuer'
+    ).length;
+    return Math.round((verifiedCount / allItems.length) * 100);
+  };
+
+  const accreditationTrustScore = calculateAccreditationScore();
+
   const updateStudentProfile = (updates: Partial<StudentProfile>) => {
     setStudent(prev => ({ ...prev, ...updates }));
+  };
+
+  const accreditClaim = (
+    category: 'courses' | 'projects' | 'certifications' | 'achievements' | 'leadership',
+    itemId: string,
+    newStatus: VerificationStatus,
+    verifierName: string = 'Dr. Farai Muringani (Head of Dept)'
+  ) => {
+    setStudent(prev => {
+      const items = (prev[category] as any[]).map(item => {
+        if (item.id === itemId) {
+          return {
+            ...item,
+            verification: {
+              status: newStatus,
+              verifiedBy: verifierName,
+              verifiedAt: new Date().toISOString().split('T')[0],
+              verificationHash: 'AU-ACC-' + Math.random().toString(36).substring(2, 8).toUpperCase(),
+              evidenceName: 'Faculty Endorsement Review',
+            }
+          };
+        }
+        return item;
+      });
+      return { ...prev, [category]: items };
+    });
   };
 
   const addCourse = (courseData: Omit<Course, 'id'>) => {
@@ -276,7 +327,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         selectedRequestId,
         setSelectedRequestId,
         recordCompleteness,
+        accreditationTrustScore,
         updateStudentProfile,
+        accreditClaim,
         addCourse,
         removeCourse,
         addSkill,

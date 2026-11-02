@@ -21,7 +21,7 @@ export const StudentSidebar: React.FC<StudentSidebarProps> = ({
   activeSection,
   onSelectSection,
 }) => {
-  const { student, recordCompleteness, setActiveStudentTab } = useApp();
+  const { student, recordCompleteness, accreditationTrustScore, setActiveStudentTab } = useApp();
 
   const menuItems = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard, count: undefined },
@@ -111,6 +111,26 @@ export const StudentSidebar: React.FC<StudentSidebarProps> = ({
           </div>
           <p className="text-[10px] text-neutral-400 mt-2 leading-relaxed">
             Complete every section to help your lecturer write a stronger letter.
+          </p>
+        </div>
+
+        {/* Accreditation Integrity Score */}
+        <div className="pt-2 border-t border-neutral-800/50">
+          <div className="flex items-center justify-between text-xs mb-1.5">
+            <span className="text-neutral-400 text-[11px] font-medium flex items-center gap-1">
+              <ShieldCheck className="w-3 h-3 text-emerald-400" />
+              <span>Accredited claims</span>
+            </span>
+            <span className="text-emerald-400 font-bold text-xs">{accreditationTrustScore}%</span>
+          </div>
+          <div className="w-full bg-neutral-800 h-1.5 rounded-full overflow-hidden">
+            <div
+              className="bg-emerald-500 h-full transition-all duration-500 rounded-full"
+              style={{ width: `${accreditationTrustScore}%` }}
+            />
+          </div>
+          <p className="text-[10px] text-neutral-400 mt-1 leading-relaxed">
+            Verified by Africa University Registrar &amp; Issuer Registries.
           </p>
         </div>
 

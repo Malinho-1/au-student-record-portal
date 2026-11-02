@@ -16,12 +16,13 @@ import {
   ArrowRight,
   Sparkles,
   FileCheck2,
-  Camera
+  Camera,
+  ShieldCheck
 } from 'lucide-react';
 
 
 export const StudentOverview: React.FC = () => {
-  const { student, setActiveStudentTab } = useApp();
+  const { student, accreditationTrustScore, setActiveStudentTab } = useApp();
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [activeModalSection, setActiveModalSection] = useState<string | null>(null);
 
@@ -147,6 +148,11 @@ export const StudentOverview: React.FC = () => {
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/60 border border-emerald-700/60 text-emerald-400 text-xs font-medium">
                 <Check className="w-3.5 h-3.5" />
                 <span>{student.academicStanding}</span>
+              </div>
+
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-950/60 border border-blue-700/60 text-blue-300 text-xs font-medium" title="Audited records authenticated via Africa University Registrar & Digital Credential Registries">
+                <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
+                <span>{accreditationTrustScore}% Accredited Records</span>
               </div>
 
               {student.resultSlipUrl && (

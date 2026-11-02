@@ -23,7 +23,14 @@ export const initialStudent: StudentProfile = {
       grade: 'A',
       credits: 4,
       semester: 'Semester 1, 2026',
-      lecturerName: 'Dr. Farai Muringani'
+      lecturerName: 'Dr. Farai Muringani',
+      verification: {
+        status: 'verified-institution',
+        verifiedBy: 'AU Registrar Examinations Board',
+        verifiedAt: '2026-06-15',
+        verificationHash: 'AU-SIS-2026-301A',
+        evidenceName: 'Official AU Result Ledger'
+      }
     },
     {
       id: 'c-2',
@@ -32,14 +39,21 @@ export const initialStudent: StudentProfile = {
       grade: 'A-',
       credits: 4,
       semester: 'Semester 2, 2025',
-      lecturerName: 'Dr. Farai Muringani'
+      lecturerName: 'Dr. Farai Muringani',
+      verification: {
+        status: 'verified-institution',
+        verifiedBy: 'AU Registrar Examinations Board',
+        verifiedAt: '2025-11-20',
+        verificationHash: 'AU-SIS-2025-204A',
+        evidenceName: 'Official AU Result Ledger'
+      }
     }
   ],
   skills: [
-    { id: 's-1', name: 'React & TypeScript', category: 'Technical', proficiency: 'Advanced' },
-    { id: 's-2', name: 'REST & GraphQL APIs', category: 'Technical', proficiency: 'Advanced' },
+    { id: 's-1', name: 'React & TypeScript', category: 'Technical', proficiency: 'Advanced', endorsedBy: ['Dr. Farai Muringani'] },
+    { id: 's-2', name: 'REST & GraphQL APIs', category: 'Technical', proficiency: 'Advanced', endorsedBy: ['Dr. Farai Muringani'] },
     { id: 's-3', name: 'Database Architecture (SQL)', category: 'Technical', proficiency: 'Intermediate' },
-    { id: 's-4', name: 'Technical Leadership & Git', category: 'Soft', proficiency: 'Advanced' }
+    { id: 's-4', name: 'Technical Leadership & Git', category: 'Soft', proficiency: 'Advanced', endorsedBy: ['Prof. Tendai Chitiyo'] }
   ],
   projects: [
     {
@@ -49,7 +63,14 @@ export const initialStudent: StudentProfile = {
       description: 'Designed and engineered a high-fidelity web application empowering students to build verified academic portfolios and streamlining lecturer recommendation letter drafting.',
       technologies: ['React', 'TypeScript', 'Tailwind CSS', 'Vite'],
       link: 'https://github.com/africa-university/student-records',
-      period: 'Aug 2026 - Present'
+      period: 'Aug 2026 - Present',
+      verification: {
+        status: 'verified-institution',
+        verifiedBy: 'Dr. Farai Muringani (Capstone Supervisor)',
+        verifiedAt: '2026-09-10',
+        verificationHash: 'AU-CAP-2026-081',
+        evidenceName: 'Departmental Capstone Audit'
+      }
     }
   ],
   certifications: [
@@ -59,7 +80,14 @@ export const initialStudent: StudentProfile = {
       issuer: 'Amazon Web Services',
       issueDate: 'Jan 2026',
       credentialId: 'AWS-AU-99214',
-      imageUrl: SAMPLE_CERTIFICATE_AWS
+      imageUrl: SAMPLE_CERTIFICATE_AWS,
+      verification: {
+        status: 'verified-issuer',
+        verifiedBy: 'Amazon Web Services Digital Registry',
+        verifiedAt: '2026-01-15',
+        verificationHash: 'AWS-VAL-99214',
+        issuerRegistryUrl: 'https://aws.amazon.com/verification'
+      }
     }
   ],
   achievements: [
@@ -69,7 +97,25 @@ export const initialStudent: StudentProfile = {
       organization: 'Africa University Faculty of Engineering',
       year: '2025 - 2026',
       description: 'Awarded for maintaining a semester GPA in the top 5% of the Computer Science cohort.',
-      imageUrl: SAMPLE_CERTIFICATE_DEANS
+      imageUrl: SAMPLE_CERTIFICATE_DEANS,
+      verification: {
+        status: 'verified-institution',
+        verifiedBy: 'Faculty Honours & Awards Committee',
+        verifiedAt: '2026-02-10',
+        verificationHash: 'AU-HON-2026-X889',
+        evidenceName: 'Faculty Dean Honor Roll'
+      }
+    },
+    {
+      id: 'ach-2',
+      title: 'Winner - National FinTech Hackathon 2026',
+      organization: 'Harare Innovation Hub',
+      year: '2026',
+      description: 'Awarded 1st place for low-bandwidth mobile financial inclusion prototype.',
+      verification: {
+        status: 'pending-review',
+        evidenceName: 'Self-Submitted Claim (Awaiting Supervisor Accreditation)'
+      }
     }
   ],
   leadership: [
@@ -78,7 +124,14 @@ export const initialStudent: StudentProfile = {
       role: 'Vice President',
       organization: 'AU Computer & Tech Innovation Society',
       duration: '2025 - Present',
-      description: 'Mentoring first-year students in programming fundamentals and organizing annual hackathons.'
+      description: 'Mentoring first-year students in programming fundamentals and organizing annual hackathons.',
+      verification: {
+        status: 'verified-institution',
+        verifiedBy: 'AU Dean of Students & Student Affairs',
+        verifiedAt: '2025-10-01',
+        verificationHash: 'AU-SOC-2025-112',
+        evidenceName: 'Elected Student Executive Ledger'
+      }
     }
   ]
 };
