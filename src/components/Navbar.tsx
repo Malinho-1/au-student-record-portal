@@ -47,6 +47,7 @@ export const Navbar: React.FC = () => {
                   )}
                 </button>
 
+                {/* Secondary optional action */}
                 <button
                   onClick={() => setActiveStudentTab('request')}
                   className={`relative py-5 text-sm font-semibold transition-colors cursor-pointer ${
@@ -55,7 +56,7 @@ export const Navbar: React.FC = () => {
                       : 'text-neutral-500 hover:text-neutral-900'
                   }`}
                 >
-                  Request a letter
+                  Request a letter (Optional)
                   {activeStudentTab === 'request' && (
                     <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#A51C30]" />
                   )}
@@ -63,10 +64,10 @@ export const Navbar: React.FC = () => {
               </nav>
             )}
 
-            {role === 'lecturer' && (
+            {role === 'academic-staff' && (
               <nav className="flex space-x-8">
                 <div className="relative py-5 text-sm font-semibold text-neutral-900">
-                  Recommendation desk
+                  Verification desk
                   <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#A51C30]" />
                 </div>
               </nav>
@@ -75,10 +76,15 @@ export const Navbar: React.FC = () => {
 
           {/* Right: Role indicator badge, Quick Actions & Sign out */}
           <div className="flex items-center gap-4">
+            {/* Demo Simulation Notice Pill */}
+            <span className="hidden lg:inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium text-neutral-500 bg-neutral-100 border border-neutral-200">
+              Demo data: verification is simulated
+            </span>
+
             {/* Quick Demo Reset */}
             <button
               onClick={() => {
-                if (window.confirm('Reset all demo data back to default Figma prototype state?')) {
+                if (window.confirm('Reset all demo data back to default state?')) {
                   resetDemoData();
                 }
               }}
@@ -91,7 +97,7 @@ export const Navbar: React.FC = () => {
 
             {/* Role Badge */}
             <span className="px-3 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase bg-neutral-100 text-neutral-700 border border-neutral-200">
-              {role === 'student' ? 'Student Portal' : 'Lecturer Portal'}
+              {role === 'student' ? 'Student Portal' : 'Academic Staff Portal'}
             </span>
 
             {/* Help / Guide button */}

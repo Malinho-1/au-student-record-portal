@@ -95,7 +95,7 @@ export const StudentSidebar: React.FC<StudentSidebarProps> = ({
         </nav>
       </div>
 
-      {/* Bottom Area: Completeness and CTA */}
+      {/* Bottom Area: Completeness and Verified Claims */}
       <div className="pt-6 border-t border-neutral-800/80 mt-6 space-y-4">
         {/* Progress Bar */}
         <div>
@@ -110,7 +110,7 @@ export const StudentSidebar: React.FC<StudentSidebarProps> = ({
             />
           </div>
           <p className="text-[10px] text-neutral-400 mt-2 leading-relaxed">
-            Complete every section to help your lecturer write a stronger letter.
+            Complete every section to build a comprehensive, documented academic record.
           </p>
         </div>
 
@@ -119,7 +119,7 @@ export const StudentSidebar: React.FC<StudentSidebarProps> = ({
           <div className="flex items-center justify-between text-xs mb-1.5">
             <span className="text-neutral-400 text-[11px] font-medium flex items-center gap-1">
               <ShieldCheck className="w-3 h-3 text-emerald-400" />
-              <span>Accredited claims</span>
+              <span>Verified claims</span>
             </span>
             <span className="text-emerald-400 font-bold text-xs">{accreditationTrustScore}%</span>
           </div>
@@ -130,21 +130,21 @@ export const StudentSidebar: React.FC<StudentSidebarProps> = ({
             />
           </div>
           <p className="text-[10px] text-neutral-400 mt-1 leading-relaxed">
-            Verified by Africa University Registrar &amp; Issuer Registries.
+            Reviewed claims. Demo data: verification is simulated.
           </p>
         </div>
 
-        {/* Start a new request action card */}
+        {/* Secondary optional action: Request a letter */}
         <button
           onClick={() => setActiveStudentTab('request')}
           className="w-full text-left p-3 rounded-lg bg-neutral-900 hover:bg-neutral-800/90 border border-neutral-800 transition-colors flex items-center justify-between group cursor-pointer"
         >
           <div>
             <div className="text-xs font-bold text-white group-hover:text-red-400 transition-colors">
-              Request a letter
+              Request a letter (Optional)
             </div>
             <div className="text-[10px] text-neutral-400">
-              Start a new request
+              Optional reference use
             </div>
           </div>
           <ChevronRight className="w-4 h-4 text-neutral-500 group-hover:text-white transition-colors" />

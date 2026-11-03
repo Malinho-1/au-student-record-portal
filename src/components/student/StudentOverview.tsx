@@ -20,7 +20,6 @@ import {
   ShieldCheck
 } from 'lucide-react';
 
-
 export const StudentOverview: React.FC = () => {
   const { student, accreditationTrustScore, setActiveStudentTab } = useApp();
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
@@ -150,9 +149,9 @@ export const StudentOverview: React.FC = () => {
                 <span>{student.academicStanding}</span>
               </div>
 
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-950/60 border border-blue-700/60 text-blue-300 text-xs font-medium" title="Audited records authenticated via Africa University Registrar & Digital Credential Registries">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-950/60 border border-blue-700/60 text-blue-300 text-xs font-medium" title="Demo data: verification is simulated. Verified claims reviewed by academic staff.">
                 <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
-                <span>{accreditationTrustScore}% Accredited Records</span>
+                <span>{accreditationTrustScore}% Verified Claims (Simulated)</span>
               </div>
 
               {student.resultSlipUrl && (
@@ -191,11 +190,15 @@ export const StudentOverview: React.FC = () => {
               Your Record At A Glance
             </div>
             <h2 className="text-2xl sm:text-3xl font-bold text-neutral-900 tracking-tight">
-              Everything a lecturer needs, organised.
+              Everything reviewed and organised.
             </h2>
             <p className="text-neutral-500 text-sm mt-1">
               Select any section to view or update documents, results slips, and certificates without cluttering your main profile.
             </p>
+          </div>
+
+          <div className="text-xs text-neutral-400 font-medium">
+            Demo data: verification is simulated.
           </div>
         </div>
 
@@ -242,7 +245,7 @@ export const StudentOverview: React.FC = () => {
         </div>
       </div>
 
-      {/* 3. Bottom CTA Banner */}
+      {/* 3. Bottom CTA Banner: Documented record first, recommendation letter secondary */}
       <div className="rounded-xl bg-neutral-100 border border-neutral-200 p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-4 text-center sm:text-left">
           <div className="w-10 h-10 rounded-lg bg-neutral-900 text-white flex items-center justify-center shrink-0">
@@ -250,10 +253,10 @@ export const StudentOverview: React.FC = () => {
           </div>
           <div>
             <h4 className="text-sm font-bold text-neutral-900">
-              Build a complete academic story.
+              Build a complete, documented academic record.
             </h4>
             <p className="text-xs text-neutral-600">
-              Your verified records and uploaded result slips empower referees to craft accurate recommendation letters.
+              Document your coursework, results slips, and achievements for academic staff review. Recommendation letters are an optional secondary use of your verified record.
             </p>
           </div>
         </div>
@@ -262,7 +265,7 @@ export const StudentOverview: React.FC = () => {
           onClick={() => setActiveStudentTab('request')}
           className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-[#A51C30] hover:bg-[#8B1727] text-white text-xs font-semibold shadow-xs transition-colors shrink-0 cursor-pointer"
         >
-          <span>Request a recommendation</span>
+          <span>Request a letter (Optional)</span>
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>

@@ -1,5 +1,7 @@
-export type UserRole = 'student' | 'lecturer';
+// User Roles in the portal: Students build verified records, Academic Staff review and verify claims
+export type UserRole = 'student' | 'academic-staff';
 
+// Status of an optional recommendation letter request
 export type RequestStatus = 'Pending' | 'In Review' | 'Completed' | 'Declined';
 
 export type RequestPurpose = 
@@ -10,16 +12,17 @@ export type RequestPurpose =
   | 'Research Fellowship'
   | 'Exchange Programme';
 
+// Verification status of an academic record item (Simulated demo)
 export type VerificationStatus = 
-  | 'verified-institution' // Verified by Africa University Registrar or Faculty Honours Board
-  | 'verified-issuer'      // Cryptographically verified by external vendor (AWS, Cisco, Google)
-  | 'pending-review'       // Uploaded evidence awaiting referee/supervisor accreditation
+  | 'verified-institution' // Verified by Academic Staff or Faculty Board (Simulated)
+  | 'verified-issuer'      // Verified by External Issuer / Credential Registry (Simulated)
+  | 'pending-review'       // Uploaded evidence awaiting academic staff verification
   | 'unverified';          // Self-reported by student without verified evidence
 
 export interface VerificationMetadata {
   status: VerificationStatus;
   verifiedBy?: string;
-  verifiedAt?: string;
+  verifiedAt?: string; // Format: DD/MM/YYYY
   verificationHash?: string;
   issuerRegistryUrl?: string;
   evidenceName?: string;
@@ -32,7 +35,8 @@ export interface Course {
   grade: string;
   credits: number;
   semester: string;
-  lecturerName?: string;
+  instructorName?: string; // Academic Staff member teaching the course
+  lecturerName?: string;   // Backward-compatible alias
   verification?: VerificationMetadata;
 }
 
@@ -60,7 +64,7 @@ export interface Certification {
   id: string;
   title: string;
   issuer: string;
-  issueDate: string;
+  issueDate: string; // Format: DD/MM/YYYY
   credentialId?: string;
   credentialUrl?: string;
   imageUrl?: string;
@@ -101,7 +105,7 @@ export interface StudentProfile {
   avatarUrl?: string;
   resultSlipUrl?: string;
   resultSlipName?: string;
-  resultSlipUploadedAt?: string;
+  resultSlipUploadedAt?: string; // Format: DD/MM/YYYY
   courses: Course[];
   skills: Skill[];
   projects: Project[];
@@ -110,21 +114,25 @@ export interface StudentProfile {
   leadership: Leadership[];
 }
 
-
+// Optional recommendation letter request attached to a verified academic record
 export interface RecommendationRequest {
   id: string;
   studentId: string;
   studentName: string;
   studentProgramme: string;
   studentYear: string;
-  lecturerId: string;
-  lecturerName: string;
-  lecturerDepartment: string;
+  staffId: string;
+  staffName: string;
+  staffDepartment: string;
+  // Aliases for compatibility
+  lecturerId?: string;
+  lecturerName?: string;
+  lecturerDepartment?: string;
   purpose: RequestPurpose;
-  deadline: string;
+  deadline: string; // Format: DD/MM/YYYY
   shortNote: string;
   status: RequestStatus;
-  submittedAt: string;
+  submittedAt: string; // Format: DD/MM/YYYY
   resultSlipUrl?: string;
   relevantCourses: {
     code: string;
@@ -134,8 +142,8 @@ export interface RecommendationRequest {
   generatedLetter?: string;
 }
 
-
-export interface Lecturer {
+// Academic Staff member who reviews and verifies student claims
+export interface AcademicStaff {
   id: string;
   name: string;
   title: string;
@@ -143,3 +151,6 @@ export interface Lecturer {
   email: string;
   taughtCourses: string[];
 }
+
+// Backward-compatible alias for Lecturer
+export type Lecturer = AcademicStaff;

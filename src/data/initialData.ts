@@ -1,4 +1,4 @@
-import type { StudentProfile, RecommendationRequest, Lecturer } from '../types';
+import type { StudentProfile, RecommendationRequest, AcademicStaff, Lecturer } from '../types';
 import { SAMPLE_RESULT_SLIP, SAMPLE_CERTIFICATE_AWS, SAMPLE_CERTIFICATE_DEANS } from './sampleDocuments';
 
 export const initialStudent: StudentProfile = {
@@ -14,7 +14,7 @@ export const initialStudent: StudentProfile = {
   aboutMe: 'Passionate computer science undergraduate with deep interest in web applications, distributed systems, and educational tech. Proven track record of consistent high academic performance and collaborative project leadership.',
   resultSlipUrl: SAMPLE_RESULT_SLIP,
   resultSlipName: 'AU_Official_Result_Slip_Semester1_2026.pdf',
-  resultSlipUploadedAt: '2026-10-18',
+  resultSlipUploadedAt: '18/10/2026', // Standardized DD/MM/YYYY
   courses: [
     {
       id: 'c-1',
@@ -23,13 +23,14 @@ export const initialStudent: StudentProfile = {
       grade: 'A',
       credits: 4,
       semester: 'Semester 1, 2026',
+      instructorName: 'Dr. Farai Muringani',
       lecturerName: 'Dr. Farai Muringani',
       verification: {
         status: 'verified-institution',
-        verifiedBy: 'AU Registrar Examinations Board',
-        verifiedAt: '2026-06-15',
-        verificationHash: 'AU-SIS-2026-301A',
-        evidenceName: 'Official AU Result Ledger'
+        verifiedBy: 'Department Academic Review Board (Simulated)',
+        verifiedAt: '15/06/2026', // Standardized DD/MM/YYYY
+        verificationHash: 'AU-SIM-2026-301A',
+        evidenceName: 'Department Academic Record (Simulated)'
       }
     },
     {
@@ -39,13 +40,14 @@ export const initialStudent: StudentProfile = {
       grade: 'A-',
       credits: 4,
       semester: 'Semester 2, 2025',
+      instructorName: 'Dr. Farai Muringani',
       lecturerName: 'Dr. Farai Muringani',
       verification: {
         status: 'verified-institution',
-        verifiedBy: 'AU Registrar Examinations Board',
-        verifiedAt: '2025-11-20',
-        verificationHash: 'AU-SIS-2025-204A',
-        evidenceName: 'Official AU Result Ledger'
+        verifiedBy: 'Department Academic Review Board (Simulated)',
+        verifiedAt: '20/11/2025', // Standardized DD/MM/YYYY
+        verificationHash: 'AU-SIM-2025-204A',
+        evidenceName: 'Department Academic Record (Simulated)'
       }
     }
   ],
@@ -60,16 +62,16 @@ export const initialStudent: StudentProfile = {
       id: 'p-1',
       title: 'AU Student Record & Recommendation System',
       role: 'Lead Frontend Developer',
-      description: 'Designed and engineered a high-fidelity web application empowering students to build verified academic portfolios and streamlining lecturer recommendation letter drafting.',
+      description: 'Designed and engineered a high-fidelity web application empowering students to build verified academic records and documented portfolios reviewed by academic staff.',
       technologies: ['React', 'TypeScript', 'Tailwind CSS', 'Vite'],
       link: 'https://github.com/africa-university/student-records',
       period: 'Aug 2026 - Present',
       verification: {
         status: 'verified-institution',
-        verifiedBy: 'Dr. Farai Muringani (Capstone Supervisor)',
-        verifiedAt: '2026-09-10',
-        verificationHash: 'AU-CAP-2026-081',
-        evidenceName: 'Departmental Capstone Audit'
+        verifiedBy: 'Dr. Farai Muringani (Academic Supervisor, Simulated)',
+        verifiedAt: '10/09/2026', // Standardized DD/MM/YYYY
+        verificationHash: 'AU-SIM-CAP-081',
+        evidenceName: 'Departmental Project Review (Simulated)'
       }
     }
   ],
@@ -78,14 +80,14 @@ export const initialStudent: StudentProfile = {
       id: 'cert-1',
       title: 'AWS Certified Cloud Practitioner',
       issuer: 'Amazon Web Services',
-      issueDate: 'Jan 2026',
+      issueDate: '15/01/2026', // Standardized DD/MM/YYYY
       credentialId: 'AWS-AU-99214',
       imageUrl: SAMPLE_CERTIFICATE_AWS,
       verification: {
         status: 'verified-issuer',
-        verifiedBy: 'Amazon Web Services Digital Registry',
-        verifiedAt: '2026-01-15',
-        verificationHash: 'AWS-VAL-99214',
+        verifiedBy: 'Amazon Web Services (Simulated Verification)',
+        verifiedAt: '15/01/2026', // Standardized DD/MM/YYYY
+        verificationHash: 'AWS-SIM-99214',
         issuerRegistryUrl: 'https://aws.amazon.com/verification'
       }
     }
@@ -100,10 +102,10 @@ export const initialStudent: StudentProfile = {
       imageUrl: SAMPLE_CERTIFICATE_DEANS,
       verification: {
         status: 'verified-institution',
-        verifiedBy: 'Faculty Honours & Awards Committee',
-        verifiedAt: '2026-02-10',
-        verificationHash: 'AU-HON-2026-X889',
-        evidenceName: 'Faculty Dean Honor Roll'
+        verifiedBy: 'Faculty Honours & Awards Committee (Simulated)',
+        verifiedAt: '10/02/2026', // Standardized DD/MM/YYYY
+        verificationHash: 'AU-SIM-HON-889',
+        evidenceName: 'Faculty Dean Honor Roll (Simulated)'
       }
     },
     {
@@ -114,7 +116,7 @@ export const initialStudent: StudentProfile = {
       description: 'Awarded 1st place for low-bandwidth mobile financial inclusion prototype.',
       verification: {
         status: 'pending-review',
-        evidenceName: 'Self-Submitted Claim (Awaiting Supervisor Accreditation)'
+        evidenceName: 'Student Submission (Awaiting Academic Staff Review)'
       }
     }
   ],
@@ -127,26 +129,26 @@ export const initialStudent: StudentProfile = {
       description: 'Mentoring first-year students in programming fundamentals and organizing annual hackathons.',
       verification: {
         status: 'verified-institution',
-        verifiedBy: 'AU Dean of Students & Student Affairs',
-        verifiedAt: '2025-10-01',
-        verificationHash: 'AU-SOC-2025-112',
-        evidenceName: 'Elected Student Executive Ledger'
+        verifiedBy: 'AU Student Affairs Committee (Simulated)',
+        verifiedAt: '01/10/2025', // Standardized DD/MM/YYYY
+        verificationHash: 'AU-SIM-SOC-112',
+        evidenceName: 'Student Society Executive Record (Simulated)'
       }
     }
   ]
 };
 
-export const initialLecturers: Lecturer[] = [
+export const initialAcademicStaff: AcademicStaff[] = [
   {
-    id: 'lec-1',
+    id: 'staff-1',
     name: 'Dr. Farai Muringani',
     title: 'Senior Lecturer & Head of Department',
     department: 'Department of Computer Science',
-    email: 'lecturer.demo@university.edu',
+    email: 'staff.demo@university.edu',
     taughtCourses: ['CSC 301', 'CSC 204']
   },
   {
-    id: 'lec-2',
+    id: 'staff-2',
     name: 'Prof. Tendai Chitiyo',
     title: 'Professor of Information Systems',
     department: 'Faculty of Management & Administration',
@@ -154,7 +156,7 @@ export const initialLecturers: Lecturer[] = [
     taughtCourses: ['MIS 301', 'MIS 402']
   },
   {
-    id: 'lec-3',
+    id: 'staff-3',
     name: 'Dr. Rudo Gwatidzo',
     title: 'Associate Professor',
     department: 'Department of Software Engineering',
@@ -163,6 +165,9 @@ export const initialLecturers: Lecturer[] = [
   }
 ];
 
+// Backward-compatible alias
+export const initialLecturers: Lecturer[] = initialAcademicStaff;
+
 export const initialRequests: RecommendationRequest[] = [
   {
     id: 'req-001',
@@ -170,14 +175,17 @@ export const initialRequests: RecommendationRequest[] = [
     studentName: initialStudent.fullName,
     studentProgramme: initialStudent.programme,
     studentYear: initialStudent.yearOfStudy,
-    lecturerId: initialLecturers[0].id,
-    lecturerName: initialLecturers[0].name,
-    lecturerDepartment: initialLecturers[0].department,
+    staffId: initialAcademicStaff[0].id,
+    staffName: initialAcademicStaff[0].name,
+    staffDepartment: initialAcademicStaff[0].department,
+    lecturerId: initialAcademicStaff[0].id,
+    lecturerName: initialAcademicStaff[0].name,
+    lecturerDepartment: initialAcademicStaff[0].department,
     purpose: 'Internship',
-    deadline: '2026-11-15',
-    shortNote: 'Applying for a Software Engineering Internship at EcoCash Holdings. I would appreciate if you could highlight my performance in CSC 301 (Advanced Web & Enterprise Systems) and my dedication to team project delivery.',
+    deadline: '15/11/2026', // Standardized DD/MM/YYYY
+    shortNote: 'Applying for a Software Engineering Internship at EcoCash Holdings. I would appreciate if you could verify my CSC 301 grade and project contributions.',
     status: 'Pending',
-    submittedAt: '2026-10-22',
+    submittedAt: '22/10/2026', // Standardized DD/MM/YYYY
     resultSlipUrl: SAMPLE_RESULT_SLIP,
     relevantCourses: [
       {
@@ -193,4 +201,3 @@ export const initialRequests: RecommendationRequest[] = [
     ]
   }
 ];
-

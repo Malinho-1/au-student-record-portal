@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useApp } from '../../context/AppContext';
+import { useApp, formatTodayDDMMYYYY } from '../../context/AppContext';
 import { ImageLightboxModal } from '../common/ImageLightboxModal';
 import { SAMPLE_RESULT_SLIP } from '../../data/sampleDocuments';
 import type { VerificationMetadata } from '../../types';
@@ -222,15 +222,15 @@ export const SectionDetailModal: React.FC<SectionDetailModalProps> = ({ sectionI
     const verification: VerificationMetadata = newCert.credentialId
       ? {
           status: 'verified-issuer',
-          verifiedBy: `${newCert.issuer} Digital Registry`,
-          verifiedAt: new Date().toISOString().split('T')[0],
+          verifiedBy: `${newCert.issuer} (Simulated Verification)`,
+          verifiedAt: formatTodayDDMMYYYY(),
           verificationHash: newCert.credentialId,
           issuerRegistryUrl: 'https://credentials.issuer.org/verify'
         }
       : newCert.imageUrl
         ? {
             status: 'pending-review',
-            evidenceName: 'Certificate Photo Attached (Pending Faculty Validation)'
+            evidenceName: 'Certificate Photo Attached (Awaiting Staff Review)'
           }
         : {
             status: 'unverified',
@@ -258,15 +258,15 @@ export const SectionDetailModal: React.FC<SectionDetailModalProps> = ({ sectionI
     const verification: VerificationMetadata = isAU
       ? {
           status: 'verified-institution',
-          verifiedBy: 'AU Faculty Honours Board (Registry Match)',
-          verifiedAt: new Date().toISOString().split('T')[0],
-          verificationHash: 'AU-HON-' + Math.random().toString(36).substring(2, 7).toUpperCase(),
-          evidenceName: 'Africa University Honours Ledger'
+          verifiedBy: 'Academic Staff Review Board (Simulated)',
+          verifiedAt: formatTodayDDMMYYYY(),
+          verificationHash: 'AU-SIM-HON-' + Math.random().toString(36).substring(2, 7).toUpperCase(),
+          evidenceName: 'Faculty Academic Record (Simulated)'
         }
       : newAch.imageUrl
         ? {
             status: 'pending-review',
-            evidenceName: 'Document Proof Attached (Awaiting Faculty Review)'
+            evidenceName: 'Document Proof Attached (Awaiting Staff Review)'
           }
         : {
             status: 'unverified',
@@ -300,7 +300,7 @@ export const SectionDetailModal: React.FC<SectionDetailModalProps> = ({ sectionI
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-900 border border-amber-300">
           <Clock className="w-3 h-3 text-amber-600" />
-          <span>Pending Faculty Accreditation</span>
+          <span>Awaiting Staff Review</span>
         </span>
       );
     }
@@ -308,7 +308,7 @@ export const SectionDetailModal: React.FC<SectionDetailModalProps> = ({ sectionI
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-300" title={`Verified by: ${v.verifiedBy} | Token: ${v.verificationHash}`}>
           <ShieldCheck className="w-3 h-3 text-emerald-600" />
-          <span>AU Registrar Verified ({v.verificationHash || 'AU-SIS'})</span>
+          <span>Verified by Staff (Simulated) · Ref: {v.verificationHash || 'AU-SIM'}</span>
         </span>
       );
     }
@@ -316,7 +316,7 @@ export const SectionDetailModal: React.FC<SectionDetailModalProps> = ({ sectionI
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-800 border border-blue-300" title={`Verified by: ${v.verifiedBy} | ID: ${v.verificationHash}`}>
           <CheckCircle2 className="w-3 h-3 text-blue-600" />
-          <span>Digital Credential Verified</span>
+          <span>Issuer Verified (Simulated)</span>
         </span>
       );
     }
@@ -377,6 +377,12 @@ export const SectionDetailModal: React.FC<SectionDetailModalProps> = ({ sectionI
 
           {/* Modal Content */}
           <div className="p-6 overflow-y-auto space-y-6">
+
+            {/* Demo Simulation Notice */}
+            <div className="p-2.5 rounded-lg bg-neutral-100 border border-neutral-200 text-neutral-600 text-[11px] flex items-center justify-between">
+              <span><strong>Demo data: verification is simulated.</strong> Claims are reviewed by academic staff.</span>
+              <span className="font-mono text-[10px] text-neutral-400">Date format: DD/MM/YYYY</span>
+            </div>
 
             {/* SECTION: ABOUT ME */}
             {sectionId === 'about' && (
@@ -862,7 +868,7 @@ export const SectionDetailModal: React.FC<SectionDetailModalProps> = ({ sectionI
                     <div className="grid grid-cols-2 gap-3">
                       <input
                         type="text"
-                        placeholder="Issue Date (e.g. Jan 2026)"
+                        placeholder="Issue Date (DD/MM/YYYY)"
                         value={newCert.issueDate}
                         onChange={e => setNewCert({ ...newCert, issueDate: e.target.value })}
                         className="px-3 py-2 text-xs border border-neutral-300 rounded-md bg-white"

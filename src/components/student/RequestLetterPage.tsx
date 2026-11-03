@@ -3,22 +3,21 @@ import { useApp } from '../../context/AppContext';
 import type { RequestPurpose } from '../../types';
 import { Check, ArrowRight, CheckCircle2 } from 'lucide-react';
 
-
 export const RequestLetterPage: React.FC = () => {
-  const { lecturers, createRequest, setActiveStudentTab } = useApp();
+  const { academicStaff, createRequest, setActiveStudentTab } = useApp();
 
-  const [lecturerId, setLecturerId] = useState(lecturers[0]?.id || '');
+  const [staffId, setStaffId] = useState(academicStaff[0]?.id || '');
   const [purpose, setPurpose] = useState<RequestPurpose>('Scholarship');
-  const [deadline, setDeadline] = useState('2026-11-20');
+  const [deadline, setDeadline] = useState('20/11/2026'); // Standard DD/MM/YYYY
   const [shortNote, setShortNote] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!lecturerId || !deadline) return;
+    if (!staffId || !deadline) return;
 
     createRequest({
-      lecturerId,
+      lecturerId: staffId,
       purpose,
       deadline,
       shortNote: shortNote.trim() || 'Please consider my academic performance and project contributions for this application.',
@@ -36,7 +35,7 @@ export const RequestLetterPage: React.FC = () => {
           </div>
           <h3 className="text-2xl font-bold text-neutral-900">Request Sent Successfully!</h3>
           <p className="text-sm text-neutral-600 leading-relaxed">
-            Your recommendation request and verified academic record have been submitted to the lecturer's Recommendation Desk.
+            Your recommendation request and documented academic record have been submitted to the academic staff Verification Desk.
           </p>
           <div className="pt-2 flex flex-col gap-2">
             <button
@@ -68,13 +67,13 @@ export const RequestLetterPage: React.FC = () => {
         <div className="lg:col-span-5 space-y-6">
           <div>
             <span className="text-[#A51C30] text-xs font-bold tracking-[0.2em] uppercase block mb-2">
-              Recommendation Request
+              Optional Reference Service
             </span>
             <h1 className="text-3xl sm:text-4xl font-bold text-neutral-900 tracking-tight mb-4">
               Request a letter
             </h1>
             <p className="text-neutral-600 text-base leading-relaxed">
-              Give your lecturer enough context to write an accurate recommendation based on your student record.
+              Recommendation letters are an optional secondary use of your verified student record. Give academic staff enough context to write an accurate recommendation.
             </p>
           </div>
 
@@ -88,10 +87,14 @@ export const RequestLetterPage: React.FC = () => {
                   Your record is attached automatically
                 </h4>
                 <p className="text-xs text-neutral-500 mt-1 leading-relaxed">
-                  Courses, projects, achievements, skills, and leadership experience.
+                  Courses, projects, achievements, skills, and leadership experience from your documented record.
                 </p>
               </div>
             </div>
+          </div>
+
+          <div className="p-3.5 bg-neutral-100 border border-neutral-200 rounded-xl text-xs text-neutral-500">
+            <strong>Demo data: verification is simulated.</strong> Date format: DD/MM/YYYY.
           </div>
         </div>
 
@@ -106,27 +109,27 @@ export const RequestLetterPage: React.FC = () => {
               </div>
               <div>
                 <h3 className="text-base font-bold text-neutral-900">Request details</h3>
-                <p className="text-xs text-neutral-500">All fields help the lecturer prepare the right letter.</p>
+                <p className="text-xs text-neutral-500">All fields help academic staff prepare the right letter.</p>
               </div>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
               
-              {/* 1. Lecturer Dropdown */}
+              {/* 1. Academic Staff Dropdown */}
               <div>
                 <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
-                  Choose a lecturer
+                  Choose academic staff member
                 </label>
                 <div className="relative">
                   <select
-                    value={lecturerId}
-                    onChange={(e) => setLecturerId(e.target.value)}
+                    value={staffId}
+                    onChange={(e) => setStaffId(e.target.value)}
                     required
                     className="w-full px-3.5 py-2.5 rounded-lg border border-neutral-300 bg-white text-sm text-neutral-900 focus:outline-hidden focus:ring-2 focus:ring-[#A51C30] focus:border-transparent transition-all cursor-pointer"
                   >
-                    {lecturers.map((lec) => (
-                      <option key={lec.id} value={lec.id}>
-                        {lec.name} — {lec.department}
+                    {academicStaff.map((staff) => (
+                      <option key={staff.id} value={staff.id}>
+                        {staff.name} — {staff.department}
                       </option>
                     ))}
                   </select>
@@ -136,7 +139,7 @@ export const RequestLetterPage: React.FC = () => {
               {/* 2. Purpose Dropdown */}
               <div>
                 <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
-                  Purpose
+                  Purpose / Opportunity
                 </label>
                 <select
                   value={purpose}
@@ -153,18 +156,19 @@ export const RequestLetterPage: React.FC = () => {
                 </select>
               </div>
 
-              {/* 3. Submission Deadline */}
+              {/* 3. Submission Deadline (DD/MM/YYYY) */}
               <div>
                 <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
-                  Submission deadline
+                  Submission deadline (DD/MM/YYYY)
                 </label>
                 <div className="relative">
                   <input
-                    type="date"
+                    type="text"
                     value={deadline}
                     onChange={(e) => setDeadline(e.target.value)}
+                    placeholder="DD/MM/YYYY (e.g. 20/11/2026)"
                     required
-                    className="w-full px-3.5 py-2.5 rounded-lg border border-neutral-300 bg-white text-sm text-neutral-900 focus:outline-hidden focus:ring-2 focus:ring-[#A51C30] focus:border-transparent transition-all"
+                    className="w-full px-3.5 py-2.5 rounded-lg border border-neutral-300 bg-white text-sm text-neutral-900 font-mono focus:outline-hidden focus:ring-2 focus:ring-[#A51C30] focus:border-transparent transition-all"
                   />
                 </div>
               </div>
@@ -178,7 +182,7 @@ export const RequestLetterPage: React.FC = () => {
                   rows={4}
                   value={shortNote}
                   onChange={(e) => setShortNote(e.target.value)}
-                  placeholder="Explain the opportunity and what the letter should highlight."
+                  placeholder="Explain the opportunity and what academic staff should highlight from your verified record."
                   className="w-full px-3.5 py-2.5 rounded-lg border border-neutral-300 bg-white text-sm text-neutral-900 focus:outline-hidden focus:ring-2 focus:ring-[#A51C30] focus:border-transparent transition-all leading-relaxed"
                 />
               </div>

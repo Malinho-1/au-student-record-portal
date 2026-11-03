@@ -6,17 +6,16 @@ import { ImageLightboxModal } from '../common/ImageLightboxModal';
 import { 
   BookOpen, 
   Check, 
-  ArrowRight, 
-  Inbox,
-  FileCheck2,
-  ShieldCheck,
-  CheckCircle2,
-  AlertTriangle,
-  Clock
+  Inbox, 
+  FileCheck2, 
+  ShieldCheck, 
+  CheckCircle2, 
+  AlertTriangle, 
+  Clock,
+  FileEdit
 } from 'lucide-react';
 
-
-export const LecturerPortal: React.FC = () => {
+export const StaffPortal: React.FC = () => {
   const { 
     requests, 
     selectedRequestId, 
@@ -29,7 +28,7 @@ export const LecturerPortal: React.FC = () => {
 
   const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
 
-  // Lightbox preview for result slip
+  // Lightbox preview for result slip or evidence images
   const [lightbox, setLightbox] = useState<{
     isOpen: boolean;
     imageUrl: string | null;
@@ -41,10 +40,9 @@ export const LecturerPortal: React.FC = () => {
     title: '',
   });
 
-  // Find currently selected request
+  // Find currently selected record
   const selectedRequest = requests.find(r => r.id === selectedRequestId) || requests[0];
-
-  const openRequestsCount = requests.filter(r => r.status === 'Pending' || r.status === 'In Review').length;
+  const pendingReviewCount = requests.filter(r => r.status === 'Pending' || r.status === 'In Review').length;
 
   const getStatusBadgeClass = (status: RequestStatus) => {
     switch (status) {
@@ -67,43 +65,51 @@ export const LecturerPortal: React.FC = () => {
     <div className="flex-1 p-6 sm:p-10 lg:p-12 overflow-y-auto bg-[#F8F7F5]">
       <div className="max-w-6xl mx-auto space-y-8">
         
-        {/* Top Header & Open Requests Counter matching Figma */}
+        {/* Top Header & Review Queue Counter */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
           <div>
             <div className="text-[#A51C30] text-[11px] font-bold tracking-[0.2em] uppercase mb-1">
-              Lecturer Portal
+              Academic Staff Portal
             </div>
             <h1 className="text-3xl sm:text-4xl font-bold text-neutral-900 tracking-tight">
-              Recommendation desk
+              Verification desk
             </h1>
             <p className="text-neutral-500 text-sm mt-1">
-              Review requests and open a student's record summary for letter writing.
+              Review student academic records and verify claims. Recommendation letters are an optional secondary reference.
             </p>
           </div>
 
-          {/* Open Requests Counter Box */}
-          <div className="bg-white p-4 rounded-xl border border-neutral-200 shadow-xs flex items-center gap-4 self-start sm:self-auto min-w-[140px] justify-between">
+          {/* Pending Review Counter Box */}
+          <div className="bg-white p-4 rounded-xl border border-neutral-200 shadow-xs flex items-center gap-4 self-start sm:self-auto min-w-[150px] justify-between">
             <div className="w-10 h-10 rounded-lg bg-neutral-100 text-neutral-700 flex items-center justify-center font-bold text-xl">
-              {openRequestsCount}
+              {pendingReviewCount}
             </div>
             <div className="text-right">
               <span className="block text-2xl font-black text-neutral-900 leading-none">
-                {openRequestsCount}
+                {pendingReviewCount}
               </span>
               <span className="text-[10px] uppercase font-bold tracking-wider text-neutral-400 mt-1 block">
-                Open requests
+                Awaiting review
               </span>
             </div>
           </div>
         </div>
 
+        {/* Demo simulation banner notice */}
+        <div className="p-3 bg-neutral-100 border border-neutral-200 rounded-lg text-xs text-neutral-600 flex items-center justify-between">
+          <span>
+            <strong>Demo data: verification is simulated.</strong> Claims and verification badges represent faculty review workflows.
+          </span>
+          <span className="text-[10px] font-mono text-neutral-400">Date format: DD/MM/YYYY</span>
+        </div>
+
         {/* Main 2-Column Split */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
-          {/* Left Column: Requests List Card */}
+          {/* Left Column: Student Records List */}
           <div className="lg:col-span-4 bg-white rounded-2xl border border-neutral-200 shadow-xs overflow-hidden">
             <div className="p-4 border-b border-neutral-100 flex items-center justify-between">
-              <h2 className="text-sm font-bold text-neutral-900">Requests</h2>
+              <h2 className="text-sm font-bold text-neutral-900">Student Records for Review</h2>
               <span className="text-xs text-neutral-400 font-medium">
                 {requests.length} total
               </span>
@@ -112,7 +118,7 @@ export const LecturerPortal: React.FC = () => {
             {requests.length === 0 ? (
               <div className="p-8 text-center text-neutral-400">
                 <Inbox className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                <p className="text-xs">No recommendation requests yet.</p>
+                <p className="text-xs">No student records waiting for review.</p>
               </div>
             ) : (
               <div className="divide-y divide-neutral-100 max-h-[550px] overflow-y-auto">
@@ -160,12 +166,12 @@ export const LecturerPortal: React.FC = () => {
             )}
           </div>
 
-          {/* Right Column: Selected Request Card */}
+          {/* Right Column: Selected Record Verification Workspace */}
           <div className="lg:col-span-8">
             {selectedRequest ? (
               <div className="bg-white rounded-2xl border border-neutral-200 shadow-xs p-6 sm:p-8 space-y-6">
                 
-                {/* Header: Student Info & Attached Documents Alert */}
+                {/* Header: Student Info & Attached Documents */}
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-full bg-neutral-900 text-white font-bold text-sm flex items-center justify-center shrink-0">
@@ -173,7 +179,7 @@ export const LecturerPortal: React.FC = () => {
                     </div>
                     <div>
                       <div className="text-[10px] font-bold tracking-[0.16em] uppercase text-neutral-400">
-                        Selected Request
+                        Selected Student Record
                       </div>
                       <h3 className="text-xl font-bold text-neutral-900">
                         {selectedRequest.studentName}
@@ -191,10 +197,10 @@ export const LecturerPortal: React.FC = () => {
                         isOpen: true,
                         imageUrl: currentResultSlip,
                         title: 'Official Africa University Result Slip',
-                        subtitle: `${selectedRequest.studentName} · Attached Verification`,
+                        subtitle: `${selectedRequest.studentName} · Documented Proof`,
                       })}
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#FAF0F1] hover:bg-[#F3D6D9] text-[#A51C30] border border-[#FCA5A5] text-xs font-semibold transition-colors cursor-pointer self-start"
-                      title="Inspect student's official result slip"
+                      title="Inspect student's uploaded result slip"
                     >
                       <FileCheck2 className="w-4 h-4" />
                       <span>View Official Result Slip</span>
@@ -202,11 +208,11 @@ export const LecturerPortal: React.FC = () => {
                   )}
                 </div>
 
-                {/* 3-Column Metadata Row */}
+                {/* 3-Column Metadata Row (Using DD/MM/YYYY) */}
                 <div className="grid grid-cols-3 gap-4 bg-neutral-50 p-4 rounded-xl border border-neutral-200/80">
                   <div>
                     <span className="text-[10px] uppercase font-bold tracking-wider text-neutral-400 block mb-1">
-                      Purpose
+                      Context / Purpose
                     </span>
                     <span className="text-xs font-bold text-neutral-800">
                       {selectedRequest.purpose}
@@ -214,15 +220,15 @@ export const LecturerPortal: React.FC = () => {
                   </div>
                   <div>
                     <span className="text-[10px] uppercase font-bold tracking-wider text-neutral-400 block mb-1">
-                      Deadline
+                      Target Date (DD/MM/YYYY)
                     </span>
-                    <span className="text-xs font-bold text-neutral-800">
+                    <span className="text-xs font-bold text-neutral-800 font-mono">
                       {selectedRequest.deadline}
                     </span>
                   </div>
                   <div>
                     <span className="text-[10px] uppercase font-bold tracking-wider text-neutral-400 block mb-1">
-                      Status
+                      Review Status
                     </span>
                     <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full border inline-block ${getStatusBadgeClass(selectedRequest.status)}`}>
                       {selectedRequest.status}
@@ -230,29 +236,29 @@ export const LecturerPortal: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Credential Accreditation & Proof Audit Panel */}
+                {/* PRIMARY FEATURE: Accredit & Endorse Action Panel */}
                 <div className="p-4 rounded-xl border border-neutral-200 bg-neutral-50/70 space-y-3">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-neutral-200 pb-2">
                     <div className="flex items-center gap-2">
                       <ShieldCheck className="w-4 h-4 text-emerald-600" />
                       <span className="text-xs font-bold text-neutral-900 uppercase tracking-wide">
-                        Accreditation &amp; Credential Proof Audit
+                        Claim Verification &amp; Accreditation Audit
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-[11px] text-neutral-500 font-medium">Verified Credential Index:</span>
+                      <span className="text-[11px] text-neutral-500 font-medium">Verified Claims:</span>
                       <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                        {accreditationTrustScore}% Authenticated
+                        {accreditationTrustScore}% Verified
                       </span>
                     </div>
                   </div>
 
                   <p className="text-[11px] text-neutral-500">
-                    Cross-referenced with Africa University Registrar SIS database and authenticated digital vendor registries. Unverified claims can be audited and endorsed below.
+                    Review student claims and uploaded evidence. Click <strong>Accredit &amp; Endorse Claim</strong> to verify submitted achievements for the student&apos;s documented record.
                   </p>
 
                   <div className="space-y-2 pt-1">
-                    {/* Achievements audit list */}
+                    {/* Achievements verification list */}
                     {student.achievements.map((ach) => {
                       const isVerified = ach.verification?.status === 'verified-institution' || ach.verification?.status === 'verified-issuer';
                       return (
@@ -266,13 +272,13 @@ export const LecturerPortal: React.FC = () => {
                               {ach.verification?.status === 'verified-institution' && (
                                 <span className="text-emerald-700 font-medium flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 text-[10px]">
                                   <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                                  AU Registrar Verified · Token: {ach.verification.verificationHash}
+                                  Verified by Staff (Simulated) · Ref: {ach.verification.verificationHash}
                                 </span>
                               )}
                               {ach.verification?.status === 'pending-review' && (
                                 <span className="text-amber-800 font-medium flex items-center gap-1 bg-amber-50 px-2 py-0.5 rounded border border-amber-300 text-[10px]">
                                   <Clock className="w-3 h-3 text-amber-600" />
-                                  Self-Reported Claim · Awaiting Referee Accreditation
+                                  Self-Reported Claim · Awaiting Staff Review
                                 </span>
                               )}
                               {ach.verification?.status === 'unverified' && (
@@ -296,16 +302,16 @@ export const LecturerPortal: React.FC = () => {
                                 })}
                                 className="text-xs text-neutral-600 hover:text-neutral-900 font-medium underline cursor-pointer"
                               >
-                                View Proof Image
+                                View Proof
                               </button>
                             )}
 
                             {!isVerified && (
                               <button
                                 type="button"
-                                onClick={() => accreditClaim('achievements', ach.id, 'verified-institution', selectedRequest.lecturerName)}
-                                className="self-start sm:self-auto inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-md transition-colors cursor-pointer shadow-2xs"
-                                title="Officially certify this claim for the student's recommendation letter"
+                                onClick={() => accreditClaim('achievements', ach.id, 'verified-institution', selectedRequest.staffName || 'Dr. Farai Muringani (Academic Staff)')}
+                                className="self-start sm:self-auto inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-md transition-colors cursor-pointer shadow-2xs"
+                                title="Officially verify and endorse this claim"
                               >
                                 <Check className="w-3 h-3" />
                                 <span>Accredit &amp; Endorse Claim</span>
@@ -316,7 +322,7 @@ export const LecturerPortal: React.FC = () => {
                       );
                     })}
 
-                    {/* Certifications audit list */}
+                    {/* Certifications verification list */}
                     {student.certifications.map((cert) => (
                       <div key={cert.id} className="p-3 rounded-lg bg-white border border-neutral-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-2xs">
                         <div>
@@ -327,7 +333,7 @@ export const LecturerPortal: React.FC = () => {
                           <div className="text-[11px] mt-1">
                             <span className="text-blue-800 font-medium flex items-center gap-1 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 text-[10px]">
                               <CheckCircle2 className="w-3 h-3 text-blue-600" />
-                              Digital Vendor Verified · Credential ID: {cert.credentialId || 'AWS-AU-99214'}
+                              Issuer Verified (Simulated) · ID: {cert.credentialId || 'AWS-AU-99214'}
                             </span>
                           </div>
                         </div>
@@ -350,7 +356,7 @@ export const LecturerPortal: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Highlight box: Courses You Taught This Student */}
+                {/* KEEP: Courses You Taught This Student panel and grades */}
                 <div className="p-4 rounded-xl border border-[#FCA5A5] bg-[#FEF2F2]/60 space-y-2">
                   <div className="flex items-center gap-2 text-[#A51C30]">
                     <BookOpen className="w-4 h-4" />
@@ -373,11 +379,11 @@ export const LecturerPortal: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Student Note */}
+                {/* Student Context Note */}
                 <div className="space-y-2 pt-2">
                   <h4 className="text-xs font-bold text-neutral-700">Student note</h4>
                   <div className="p-4 bg-neutral-50 rounded-xl border border-neutral-200 text-xs text-neutral-700 leading-relaxed italic">
-                    "{selectedRequest.shortNote}"
+                    &ldquo;{selectedRequest.shortNote}&rdquo;
                   </div>
                 </div>
 
@@ -385,6 +391,7 @@ export const LecturerPortal: React.FC = () => {
                 <div className="pt-4 border-t border-neutral-200 flex flex-wrap items-center justify-between gap-4">
                   {/* Status Dropdown */}
                   <div className="flex items-center gap-2">
+                    <span className="text-xs font-medium text-neutral-500">Record Status:</span>
                     <select
                       value={selectedRequest.status}
                       onChange={(e) => updateRequestStatus(selectedRequest.id, e.target.value as RequestStatus)}
@@ -392,12 +399,12 @@ export const LecturerPortal: React.FC = () => {
                     >
                       <option value="Pending">Pending</option>
                       <option value="In Review">In Review</option>
-                      <option value="Completed">Completed</option>
+                      <option value="Completed">Verified / Completed</option>
                       <option value="Declined">Declined</option>
                     </select>
                   </div>
 
-                  {/* Mark as completed & Open student summary */}
+                  {/* Secondary Action: Letter Generator */}
                   <div className="flex items-center gap-3">
                     {selectedRequest.status !== 'Completed' && (
                       <button
@@ -405,16 +412,18 @@ export const LecturerPortal: React.FC = () => {
                         className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-semibold transition-colors cursor-pointer"
                       >
                         <Check className="w-3.5 h-3.5" />
-                        <span>Mark as completed</span>
+                        <span>Mark Record Verified</span>
                       </button>
                     )}
 
+                    {/* Secondary letter generator */}
                     <button
                       onClick={() => setIsGeneratorOpen(true)}
-                      className="inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-[#A51C30] hover:bg-[#8B1727] text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                      title="Optional: Draft a formal recommendation letter from this record"
                     >
-                      <span>Open student summary</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
+                      <FileEdit className="w-3.5 h-3.5 text-amber-300" />
+                      <span>Draft Letter (Optional)</span>
                     </button>
                   </div>
                 </div>
@@ -423,8 +432,8 @@ export const LecturerPortal: React.FC = () => {
             ) : (
               <div className="bg-white rounded-2xl border border-neutral-200 p-12 text-center text-neutral-400">
                 <Inbox className="w-12 h-12 mx-auto mb-3 opacity-40" />
-                <h3 className="text-base font-bold text-neutral-700">No Request Selected</h3>
-                <p className="text-xs text-neutral-500 mt-1">Select a request from the left list to review details.</p>
+                <h3 className="text-base font-bold text-neutral-700">No Student Selected</h3>
+                <p className="text-xs text-neutral-500 mt-1">Select a student record from the left list to review.</p>
               </div>
             )}
           </div>
@@ -433,7 +442,7 @@ export const LecturerPortal: React.FC = () => {
 
       </div>
 
-      {/* Recommendation Generator & Student Summary Modal */}
+      {/* Secondary Letter Generator Modal */}
       {selectedRequest && (
         <LetterGeneratorModal
           request={selectedRequest}
@@ -442,7 +451,7 @@ export const LecturerPortal: React.FC = () => {
         />
       )}
 
-      {/* Lightbox for inspecting Result Slip */}
+      {/* Lightbox for inspecting Result Slip / Certificates */}
       <ImageLightboxModal
         isOpen={lightbox.isOpen}
         onClose={() => setLightbox({ ...lightbox, isOpen: false })}

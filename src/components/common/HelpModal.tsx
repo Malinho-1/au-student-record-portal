@@ -18,12 +18,12 @@ export const HelpModal: React.FC = () => {
             <AfricaUniversityLogo className="h-8" showSubtitle={false} />
             <div>
               <h3 className="text-sm font-bold text-neutral-900">Project Overview &amp; Evaluation Guide</h3>
-              <p className="text-xs text-neutral-500">Student Record &amp; Recommendation Letter System</p>
+              <p className="text-xs text-neutral-500">Student Academic Record &amp; Verification Portal</p>
             </div>
           </div>
           <button
             onClick={() => setIsHelpOpen(false)}
-            className="p-1 rounded-lg text-neutral-400 hover:text-neutral-700 hover:bg-neutral-200/60 transition-colors"
+            className="p-1 rounded-lg text-neutral-400 hover:text-neutral-700 hover:bg-neutral-200/60 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -34,30 +34,33 @@ export const HelpModal: React.FC = () => {
           
           <div className="p-4 bg-red-50 rounded-xl border border-red-100">
             <h4 className="font-bold text-[#A51C30] uppercase tracking-wide text-xs mb-1">
-              Final Exam Project Purpose
+              Project Purpose
             </h4>
             <p>
-              This portal bridges the gap between students seeking recommendation letters (for internships, scholarships, and jobs) and academic referees/lecturers who need verified records to quickly and accurately compose formal letters.
+              A student builds a complete, documented academic record (courses and grades, result slips, certifications, achievements, projects, leadership). Academic staff review and verify the claims. Recommendation letters are one optional use of a verified record, not the main purpose.
+            </p>
+            <p className="text-[11px] text-neutral-500 mt-2">
+              <strong>Demo data: verification is simulated.</strong> Standard date format: DD/MM/YYYY.
             </p>
           </div>
 
           {/* Quick Flow Walkthrough */}
           <div className="space-y-3">
             <h4 className="font-bold text-neutral-900 text-xs uppercase tracking-wider">
-              Prototype Testing Flow (Matches Figma 1:1)
+              Prototype Testing Flow
             </h4>
             <ol className="list-decimal pl-4 space-y-2">
               <li>
-                <strong>Sign in Screen (Screen 1):</strong> Switch between Student and Lecturer roles. Demo credentials are automatically supplied.
+                <strong>Sign in Screen:</strong> Switch between Student and Academic Staff roles. Demo credentials are supplied automatically.
               </li>
               <li>
-                <strong>Student Record Overview (Screen 2):</strong> View profile standing, dark hero header, and 6 record cards (About me, Courses, Skills, Projects, Certifications, Achievements). Click any card to add/edit items and watch the completeness meter update.
+                <strong>Student Record Overview:</strong> View profile standing, dark hero header, and 6 record cards (About me, Courses &amp; results, Skills, Projects, Certifications, Achievements). Click any card to inspect claims and uploaded evidence.
               </li>
               <li>
-                <strong>Request a Letter (Screen 3):</strong> Click "Request a letter", select a lecturer, enter application purpose, deadline, and notes. The student record is automatically attached.
+                <strong>Verification Desk (Academic Staff):</strong> Switch to Academic Staff mode. Inspect student records awaiting review, see the "Courses you taught this student" panel and grades, and use <em>"Accredit &amp; Endorse Claim"</em> as the main feature.
               </li>
               <li>
-                <strong>Lecturer Desk (Screen 4):</strong> Switch to Lecturer mode. Inspect pending requests, see courses taught, and click <em>"Open student summary"</em> to review the full academic record and generate/copy/print a formal recommendation letter.
+                <strong>Optional Letter Service:</strong> Recommendation letters can be generated as an optional reference from the student&apos;s verified record if requested.
               </li>
             </ol>
           </div>
@@ -69,7 +72,7 @@ export const HelpModal: React.FC = () => {
               <span>Team Collaboration &amp; Git Repository Setup</span>
             </div>
             <p className="text-neutral-600">
-              The project is set up as a standard Git repository with a modular architecture, clean commit history, and a collaborative <code>README.md</code> with branching workflows (<code>feature/auth</code>, <code>feature/student-record</code>, <code>feature/lecturer-desk</code>) so your team can commit continuously and maximize exam evaluation points.
+              The project is set up as a standard Git repository with a modular architecture, clean commit history, and a collaborative <code>README.md</code> with branching workflows (<code>feature/auth</code>, <code>feature/student-record</code>, <code>feature/staff-verification</code>) so your team can commit continuously and maximize evaluation points.
             </p>
           </div>
 
@@ -80,7 +83,7 @@ export const HelpModal: React.FC = () => {
           <span className="text-[11px] text-neutral-400">Africa University · Academic Computing</span>
           <button
             onClick={() => setIsHelpOpen(false)}
-            className="px-4 py-1.5 text-xs font-semibold bg-neutral-900 text-white rounded-lg hover:bg-neutral-800"
+            className="px-4 py-1.5 text-xs font-semibold bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 cursor-pointer"
           >
             Got it
           </button>

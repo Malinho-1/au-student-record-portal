@@ -15,7 +15,7 @@ export const AuthPage: React.FC = () => {
     if (newRole === 'student') {
       setEmail('student.demo@university.edu');
     } else {
-      setEmail('lecturer.demo@university.edu');
+      setEmail('staff.demo@university.edu');
     }
   };
 
@@ -42,26 +42,26 @@ export const AuthPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Hero Narrative */}
+        {/* Hero Narrative: Academic record portal with faculty verification */}
         <div className="my-auto py-12 lg:py-0 relative z-10 max-w-lg">
           <div className="text-[#E53E3E] text-xs font-bold tracking-[0.2em] uppercase mb-6">
-            Student Record &amp; Recommendation Portal
+            Student Academic Record &amp; Verification Portal
           </div>
           
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.08] mb-8 font-sans">
-            Records ready.<br />
-            Recommendations<br />
-            made easier.
+            Complete records.<br />
+            Verified by<br />
+            faculty.
           </h1>
 
           <p className="text-neutral-400 text-lg sm:text-xl font-normal leading-relaxed">
-            Keep a clear academic record so recommendation letters can be written quickly and accurately.
+            Build a complete, documented academic record of your courses, results, certifications, and achievements — reviewed and verified by academic staff.
           </p>
         </div>
 
         {/* Footer */}
         <div className="relative z-10 pt-8 text-neutral-500 text-xs tracking-wide">
-          Africa University · Academic records portal
+          Africa University · Academic records &amp; verification portal
         </div>
       </div>
 
@@ -82,7 +82,7 @@ export const AuthPage: React.FC = () => {
             </p>
           </div>
 
-          {/* Role Switcher Cards */}
+          {/* Role Switcher Cards: Student vs Academic Staff */}
           <div className="grid grid-cols-2 gap-4 mb-6">
             {/* Student Card */}
             <button
@@ -103,22 +103,22 @@ export const AuthPage: React.FC = () => {
               </div>
             </button>
 
-            {/* Lecturer Card */}
+            {/* Academic Staff Card */}
             <button
               type="button"
-              onClick={() => handleRoleChange('lecturer')}
+              onClick={() => handleRoleChange('academic-staff')}
               className={`p-4 rounded-xl text-left transition-all cursor-pointer flex flex-col justify-between ${
-                selectedRole === 'lecturer'
+                selectedRole === 'academic-staff'
                   ? 'border-2 border-[#A51C30] bg-white shadow-xs'
                   : 'border border-neutral-300 bg-white hover:border-neutral-400 opacity-80'
               }`}
             >
               <div className="flex items-center gap-2 mb-2">
-                <Users className={`w-5 h-5 ${selectedRole === 'lecturer' ? 'text-[#A51C30]' : 'text-neutral-600'}`} />
+                <Users className={`w-5 h-5 ${selectedRole === 'academic-staff' ? 'text-[#A51C30]' : 'text-neutral-600'}`} />
               </div>
               <div>
-                <div className="text-sm font-bold text-neutral-900">Lecturer</div>
-                <div className="text-xs text-neutral-500 mt-0.5">Review requests</div>
+                <div className="text-sm font-bold text-neutral-900">Academic Staff</div>
+                <div className="text-xs text-neutral-500 mt-0.5">Review &amp; verify records</div>
               </div>
             </button>
           </div>
@@ -131,7 +131,7 @@ export const AuthPage: React.FC = () => {
             <div>
               <p className="text-xs font-semibold text-emerald-900">Demo access ready</p>
               <p className="text-xs text-emerald-700 mt-0.5">
-                Placeholder credentials are filled in automatically.
+                Placeholder credentials filled automatically. <strong className="font-semibold">Demo data: verification is simulated.</strong>
               </p>
             </div>
           </div>
@@ -170,15 +170,18 @@ export const AuthPage: React.FC = () => {
               type="submit"
               className="w-full py-3.5 px-6 rounded-lg bg-[#A51C30] hover:bg-[#8B1727] text-white text-sm font-semibold tracking-wide shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span>Continue as {selectedRole === 'student' ? 'Student' : 'Lecturer'}</span>
+              <span>Continue as {selectedRole === 'student' ? 'Student' : 'Academic Staff'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
 
           {/* Prototype disclaimer */}
-          <div className="mt-8 pt-4 flex items-center justify-center gap-2 text-xs text-neutral-500">
-            <Lock className="w-3.5 h-3.5 text-neutral-400" />
-            <span>Placeholder sign-in for the front-end prototype.</span>
+          <div className="mt-8 pt-4 flex flex-col items-center justify-center gap-1 text-center text-xs text-neutral-500">
+            <div className="flex items-center gap-1.5">
+              <Lock className="w-3.5 h-3.5 text-neutral-400" />
+              <span>Placeholder sign-in for the front-end prototype.</span>
+            </div>
+            <span className="text-[11px] text-neutral-400">Demo data: verification is simulated.</span>
           </div>
 
         </div>
