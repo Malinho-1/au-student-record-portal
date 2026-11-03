@@ -87,7 +87,10 @@ interface AppContextType {
   removeLeadership: (id: string) => void;
   
   createRequest: (requestData: {
-    lecturerId: string;
+    lecturerId?: string;
+    staffName?: string;
+    staffEmail?: string;
+    staffDepartment?: string;
     purpose: RecommendationRequest['purpose'];
     deadline: string;
     shortNote: string;
@@ -484,17 +487,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const createRequest = ({
     lecturerId,
+    staffName,
+    staffEmail,
+    staffDepartment,
     purpose,
     deadline,
     shortNote,
   }: {
-    lecturerId: string;
+    lecturerId?: string;
+    staffName?: string;
+    staffEmail?: string;
+    staffDepartment?: string;
     purpose: RecommendationRequest['purpose'];
     deadline: string;
     shortNote: string;
   }) => {
-    const staff = academicStaff.find(s => s.id === lecturerId) || academicStaff[0];
+    // If lecturerId matched an existing staff member in directory
+    const matchedStaff = lecturerId ? academicStaff.find(s => s.id === lecturerId) : null;
     
+    const staffId = matchedStaff?.id || lecturerId || 'staff-' + Date.now();
+    const finalStaffName = matchedStaff?.name || staffName || 'Academic Staff Reviewer';
+    const finalDepartment = matchedStaff?.department || staffDepartment || 'Department of Computer Science';
+    const finalEmail = matchedStaff?.email || staffEmail || `${finalStaffName.toLowerCase().replace(/[^a-z0-9]/g, '')}@africau.edu`;
+
     const relevantCourses = student.courses.map(c => ({
       code: c.code,
       title: c.title,
@@ -507,12 +522,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       studentName: student.fullName,
       studentProgramme: student.programme,
       studentYear: student.yearOfStudy,
-      staffId: staff.id,
-      staffName: staff.name,
-      staffDepartment: staff.department,
-      lecturerId: staff.id,
-      lecturerName: staff.name,
-      lecturerDepartment: staff.department,
+      staffId,
+      staffName: finalStaffName,
+      staffDepartment: finalDepartment,
+      staffEmail: finalEmail,
+      lecturerId: staffId,
+      lecturerName: finalStaffName,
+      lecturerDepartment: finalDepartment,
       purpose,
       deadline,
       shortNote,

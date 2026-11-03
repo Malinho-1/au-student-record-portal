@@ -66,6 +66,29 @@ app.get('/api/health', (req, res) => {
 });
 
 /**
+ * GET /api/staff
+ * Lists or searches academic staff directory with university emails
+ */
+app.get('/api/staff', (req, res, next) => {
+  try {
+    const { q } = req.query;
+    if (q) {
+      const term = `%${q}%`;
+      const staffMembers = db.prepare(`
+        SELECT * FROM staff 
+        WHERE name LIKE ? OR email LIKE ? OR department LIKE ?
+        ORDER BY name ASC
+      `).all(term, term, term);
+      return res.json(staffMembers);
+    }
+    const staffMembers = db.prepare('SELECT * FROM staff ORDER BY name ASC').all();
+    res.json(staffMembers);
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
  * 1. GET /api/students/:id
  * Returns complete student profile with courses, certifications, achievements, and claims
  */

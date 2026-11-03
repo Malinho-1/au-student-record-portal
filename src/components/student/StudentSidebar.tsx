@@ -9,17 +9,20 @@ import {
   Award, 
   Trophy, 
   ShieldCheck,
-  ChevronRight
+  ChevronRight,
+  X
 } from 'lucide-react';
 
 interface StudentSidebarProps {
   activeSection: string;
   onSelectSection: (section: string) => void;
+  onCloseMobile?: () => void;
 }
 
 export const StudentSidebar: React.FC<StudentSidebarProps> = ({
   activeSection,
   onSelectSection,
+  onCloseMobile,
 }) => {
   const { student, recordCompleteness, accreditationTrustScore, setActiveStudentTab } = useApp();
 
@@ -34,11 +37,33 @@ export const StudentSidebar: React.FC<StudentSidebarProps> = ({
     { id: 'leadership', label: 'Leadership', icon: ShieldCheck, count: student.leadership.length },
   ];
 
+  const handleItemClick = (id: string) => {
+    onSelectSection(id);
+    if (onCloseMobile) {
+      onCloseMobile();
+    }
+  };
+
   return (
-    <aside className="w-full md:w-64 bg-[#18181B] text-neutral-300 flex flex-col justify-between shrink-0 p-4 border-r border-neutral-800">
+    <aside className="w-full md:w-64 bg-[#18181B] text-neutral-300 flex flex-col justify-between shrink-0 p-4 border-r border-neutral-800 h-full overflow-y-auto">
       
-      {/* Top Profile Capsule */}
+      {/* Top Profile Capsule & Mobile Close Button */}
       <div>
+        {onCloseMobile && (
+          <div className="flex items-center justify-between pb-3 mb-3 border-b border-neutral-800 md:hidden">
+            <span className="text-xs font-bold uppercase tracking-wider text-neutral-400">
+              Record Sections
+            </span>
+            <button
+              onClick={onCloseMobile}
+              className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors"
+              aria-label="Close menu"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        )}
+
         <div className="flex items-center gap-3 p-3 bg-neutral-900/60 rounded-xl border border-neutral-800 mb-6">
           <div className="w-10 h-10 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-neutral-300 shrink-0 font-semibold text-sm">
             {student.fullName ? student.fullName.split(' ').map((n: string) => n[0]).join('') : 'SN'}
@@ -67,7 +92,7 @@ export const StudentSidebar: React.FC<StudentSidebarProps> = ({
             return (
               <button
                 key={item.id}
-                onClick={() => onSelectSection(item.id)}
+                onClick={() => handleItemClick(item.id)}
                 className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                   isSelected
                     ? 'bg-[#A51C30] text-white shadow-xs font-semibold'
@@ -136,7 +161,10 @@ export const StudentSidebar: React.FC<StudentSidebarProps> = ({
 
         {/* Secondary optional action: Request a letter */}
         <button
-          onClick={() => setActiveStudentTab('request')}
+          onClick={() => {
+            setActiveStudentTab('request');
+            if (onCloseMobile) onCloseMobile();
+          }}
           className="w-full text-left p-3 rounded-lg bg-neutral-900 hover:bg-neutral-800/90 border border-neutral-800 transition-colors flex items-center justify-between group cursor-pointer"
         >
           <div>

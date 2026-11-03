@@ -133,6 +133,7 @@ export interface RecommendationRequest {
   staffId: string;
   staffName: string;
   staffDepartment: string;
+  staffEmail?: string;
   // Aliases for compatibility
   lecturerId?: string;
   lecturerName?: string;

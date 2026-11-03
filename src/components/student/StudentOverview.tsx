@@ -94,10 +94,10 @@ export const StudentOverview: React.FC = () => {
   ];
 
   return (
-    <div className="flex-1 p-6 sm:p-8 lg:p-10 space-y-8 overflow-y-auto">
+    <div className="flex-1 p-4 sm:p-8 lg:p-10 space-y-6 sm:space-y-8 overflow-y-auto">
       
       {/* 1. Dark Hero Card matching Figma */}
-      <div className="relative rounded-2xl bg-[#18181B] text-white p-6 sm:p-8 overflow-hidden shadow-sm border border-neutral-800">
+      <div className="relative rounded-2xl bg-[#18181B] text-white p-4 sm:p-8 overflow-hidden shadow-sm border border-neutral-800">
         {/* Subtle red ambient glow in the top right */}
         <div className="absolute -top-16 -right-16 w-80 h-80 bg-[#A51C30]/25 rounded-full blur-3xl pointer-events-none" />
 
@@ -106,12 +106,12 @@ export const StudentOverview: React.FC = () => {
             Student Record
           </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-            <div className="flex items-center gap-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 sm:gap-6">
+            <div className="flex items-center gap-4 sm:gap-5">
               {/* Circular Avatar with custom photo or initials */}
               <div 
                 onClick={() => setIsEditProfileOpen(true)}
-                className="w-18 h-18 sm:w-20 sm:h-20 rounded-full border-2 border-neutral-600 bg-neutral-800 flex items-center justify-center text-neutral-300 font-semibold text-xl shrink-0 overflow-hidden relative group cursor-pointer"
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-neutral-600 bg-neutral-800 flex items-center justify-center text-neutral-300 font-semibold text-lg sm:text-xl shrink-0 overflow-hidden relative group cursor-pointer"
                 title="Click to edit profile or upload photo"
               >
                 {student.avatarUrl ? (
@@ -125,17 +125,17 @@ export const StudentOverview: React.FC = () => {
               </div>
 
               {/* Title & Metadata */}
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+              <div className="overflow-hidden">
+                <h1 className="text-xl sm:text-3xl font-bold text-white tracking-tight truncate">
                   {student.fullName}
                 </h1>
-                <p className="text-neutral-300 text-sm font-medium mt-1">
+                <p className="text-neutral-300 text-xs sm:text-sm font-medium mt-1 truncate">
                   {student.programme}
                 </p>
-                <div className="text-xs text-neutral-400 mt-1 flex flex-wrap items-center gap-2">
+                <div className="text-[11px] sm:text-xs text-neutral-400 mt-1 flex flex-wrap items-center gap-1.5 sm:gap-2">
                   <span>{student.yearOfStudy}</span>
                   <span>·</span>
-                  <span>{student.faculty}</span>
+                  <span className="truncate max-w-[140px] sm:max-w-none">{student.faculty}</span>
                   <span>·</span>
                   <span className="font-semibold text-red-300">GPA {student.gpa}</span>
                 </div>
@@ -143,7 +143,7 @@ export const StudentOverview: React.FC = () => {
             </div>
 
             {/* Badges & Edit Profile Button */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/60 border border-emerald-700/60 text-emerald-400 text-xs font-medium">
                 <Check className="w-3.5 h-3.5" />
                 <span>{student.academicStanding}</span>

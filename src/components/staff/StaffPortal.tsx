@@ -27,6 +27,7 @@ export const StaffPortal: React.FC = () => {
   } = useApp();
 
   const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
+  const [mobileTab, setMobileTab] = useState<'queue' | 'details'>('queue');
 
   // Lightbox preview for result slip or evidence images
   const [lightbox, setLightbox] = useState<{
@@ -62,8 +63,8 @@ export const StaffPortal: React.FC = () => {
   const currentResultSlip = selectedRequest?.resultSlipUrl || student.resultSlipUrl;
 
   return (
-    <div className="flex-1 p-6 sm:p-10 lg:p-12 overflow-y-auto bg-[#F8F7F5]">
-      <div className="max-w-6xl mx-auto space-y-8">
+    <div className="flex-1 p-4 sm:p-8 lg:p-12 overflow-y-auto bg-[#F8F7F5]">
+      <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
         
         {/* Top Header & Review Queue Counter */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
@@ -71,16 +72,16 @@ export const StaffPortal: React.FC = () => {
             <div className="text-[#A51C30] text-[11px] font-bold tracking-[0.2em] uppercase mb-1">
               Academic Staff Portal
             </div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-neutral-900 tracking-tight">
+            <h1 className="text-2xl sm:text-4xl font-bold text-neutral-900 tracking-tight">
               Verification desk
             </h1>
-            <p className="text-neutral-500 text-sm mt-1">
+            <p className="text-neutral-500 text-xs sm:text-sm mt-1">
               Review student academic records and verify claims. Recommendation letters are an optional secondary reference.
             </p>
           </div>
 
           {/* Pending Review Counter Box */}
-          <div className="bg-white p-4 rounded-xl border border-neutral-200 shadow-xs flex items-center gap-4 self-start sm:self-auto min-w-[150px] justify-between">
+          <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-neutral-200 shadow-xs flex items-center gap-4 self-start sm:self-auto min-w-[150px] justify-between">
             <div className="w-10 h-10 rounded-lg bg-neutral-100 text-neutral-700 flex items-center justify-center font-bold text-xl">
               {pendingReviewCount}
             </div>
@@ -96,18 +97,48 @@ export const StaffPortal: React.FC = () => {
         </div>
 
         {/* Demo simulation banner notice */}
-        <div className="p-3 bg-neutral-100 border border-neutral-200 rounded-lg text-xs text-neutral-600 flex items-center justify-between">
+        <div className="p-3 bg-neutral-100 border border-neutral-200 rounded-lg text-xs text-neutral-600 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <span>
             <strong>Demo data: verification is simulated.</strong> Claims and verification badges represent faculty review workflows.
           </span>
-          <span className="text-[10px] font-mono text-neutral-400">Date format: DD/MM/YYYY</span>
+          <span className="text-[10px] font-mono text-neutral-400 shrink-0">Date format: DD/MM/YYYY</span>
+        </div>
+
+        {/* Mobile Toggle Bar between Queue and Details (Hidden on Desktop) */}
+        <div className="flex lg:hidden bg-neutral-200/80 p-1 rounded-xl gap-1 shadow-2xs">
+          <button
+            type="button"
+            onClick={() => setMobileTab('queue')}
+            className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              mobileTab === 'queue'
+                ? 'bg-white text-neutral-900 shadow-xs'
+                : 'text-neutral-600 hover:text-neutral-900'
+            }`}
+          >
+            <Inbox className="w-3.5 h-3.5" />
+            <span>Records Queue ({requests.length})</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setMobileTab('details')}
+            className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              mobileTab === 'details'
+                ? 'bg-white text-neutral-900 shadow-xs'
+                : 'text-neutral-600 hover:text-neutral-900'
+            }`}
+          >
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>Audit & Verification</span>
+          </button>
         </div>
 
         {/* Main 2-Column Split */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
           {/* Left Column: Student Records List */}
-          <div className="lg:col-span-4 bg-white rounded-2xl border border-neutral-200 shadow-xs overflow-hidden">
+          <div className={`lg:col-span-4 bg-white rounded-2xl border border-neutral-200 shadow-xs overflow-hidden ${
+            mobileTab === 'details' ? 'hidden lg:block' : 'block'
+          }`}>
             <div className="p-4 border-b border-neutral-100 flex items-center justify-between">
               <h2 className="text-sm font-bold text-neutral-900">Student Records for Review</h2>
               <span className="text-xs text-neutral-400 font-medium">
@@ -129,7 +160,10 @@ export const StaffPortal: React.FC = () => {
                   return (
                     <button
                       key={req.id}
-                      onClick={() => setSelectedRequestId(req.id)}
+                      onClick={() => {
+                        setSelectedRequestId(req.id);
+                        setMobileTab('details');
+                      }}
                       className={`w-full text-left p-4 transition-all flex items-center justify-between cursor-pointer ${
                         isSelected
                           ? 'bg-neutral-50/90 border-l-4 border-l-[#A51C30]'
@@ -167,7 +201,9 @@ export const StaffPortal: React.FC = () => {
           </div>
 
           {/* Right Column: Selected Record Verification Workspace */}
-          <div className="lg:col-span-8">
+          <div className={`lg:col-span-8 ${
+            mobileTab === 'queue' ? 'hidden lg:block' : 'block'
+          }`}>
             {selectedRequest ? (
               <div className="bg-white rounded-2xl border border-neutral-200 shadow-xs p-6 sm:p-8 space-y-6">
                 
