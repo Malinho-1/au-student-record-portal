@@ -323,36 +323,60 @@ export const StaffPortal: React.FC = () => {
                     })}
 
                     {/* Certifications verification list */}
-                    {student.certifications.map((cert) => (
-                      <div key={cert.id} className="p-3 rounded-lg bg-white border border-neutral-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-2xs">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-neutral-900">{cert.title}</span>
-                            <span className="text-[10px] text-neutral-400">({cert.issuer})</span>
+                    {student.certifications.map((cert) => {
+                      const isVerified = cert.verification?.status === 'verified-institution' || cert.verification?.status === 'verified-issuer' || cert.status === 'Endorsed';
+                      return (
+                        <div key={cert.id} className="p-3 rounded-lg bg-white border border-neutral-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-2xs">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-neutral-900">{cert.title}</span>
+                              <span className="text-[10px] text-neutral-400">({cert.issuer})</span>
+                            </div>
+                            <div className="text-[11px] mt-1 flex flex-wrap items-center gap-2">
+                              {isVerified ? (
+                                <span className="text-blue-800 font-medium flex items-center gap-1 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 text-[10px]">
+                                  <CheckCircle2 className="w-3 h-3 text-blue-600" />
+                                  Issuer Verified (Simulated) · ID: {cert.credentialId || 'DEMO-VAL'}
+                                </span>
+                              ) : (
+                                <span className="text-amber-800 font-medium flex items-center gap-1 bg-amber-50 px-2 py-0.5 rounded border border-amber-300 text-[10px]">
+                                  <Clock className="w-3 h-3 text-amber-600" />
+                                  Self-Reported Claim · Awaiting Staff Review
+                                </span>
+                              )}
+                            </div>
                           </div>
-                          <div className="text-[11px] mt-1">
-                            <span className="text-blue-800 font-medium flex items-center gap-1 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 text-[10px]">
-                              <CheckCircle2 className="w-3 h-3 text-blue-600" />
-                              Issuer Verified (Simulated) · ID: {cert.credentialId || 'AWS-AU-99214'}
-                            </span>
+                          <div className="flex items-center gap-2">
+                            {cert.imageUrl && (
+                              <button
+                                type="button"
+                                onClick={() => setLightbox({
+                                  isOpen: true,
+                                  imageUrl: cert.imageUrl || null,
+                                  title: cert.title,
+                                  subtitle: `${cert.issuer} · Verified Credential`,
+                                })}
+                                className="text-xs text-neutral-600 hover:text-neutral-900 font-medium underline cursor-pointer"
+                              >
+                                Inspect Certificate
+                              </button>
+                            )}
+
+                            {!isVerified && (
+                              <button
+                                type="button"
+                                onClick={() => accreditClaim('certifications', cert.id, 'verified-issuer', selectedRequest.staffName || 'Demo Academic Staff')}
+                                className="self-start sm:self-auto inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-md transition-colors cursor-pointer shadow-2xs"
+                                title="Officially verify and endorse this certification claim"
+                              >
+                                <Check className="w-3 h-3" />
+                                <span>Accredit &amp; Endorse Claim</span>
+                              </button>
+                            )}
                           </div>
                         </div>
-                        {cert.imageUrl && (
-                          <button
-                            type="button"
-                            onClick={() => setLightbox({
-                              isOpen: true,
-                              imageUrl: cert.imageUrl || null,
-                              title: cert.title,
-                              subtitle: `${cert.issuer} · Verified Credential`,
-                            })}
-                            className="text-xs text-neutral-600 hover:text-neutral-900 font-medium underline cursor-pointer"
-                          >
-                            Inspect Certificate
-                          </button>
-                        )}
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
 

@@ -32,11 +32,12 @@ A student builds a complete, documented academic record (courses and grades, res
 
 ## 🛠️ Technology Stack
 
-- **Framework:** React 19 + TypeScript (Strict Type Safety)
-- **Bundler & Build Tool:** Vite
+- **Frontend:** React 19 + TypeScript (Strict Type Safety)
+- **Bundler & Build Tool:** Vite (configured with dev proxy for `/api`)
+- **Backend API:** Node.js + Express
+- **Database:** SQLite (using `better-sqlite3` and native `node:sqlite`)
 - **Styling:** Tailwind CSS v4 + Custom Africa University Design Tokens
 - **Icons:** Lucide React
-- **Persistence:** Browser `localStorage` with reactive state synchronization
 - **Version Control:** Git with Conventional Commits
 
 ---
@@ -44,29 +45,58 @@ A student builds a complete, documented academic record (courses and grades, res
 ## 🚀 Getting Started
 
 ### 1. Prerequisites
-Ensure you have Node.js (v18+ or v20+) installed on your machine.
+Ensure you have Node.js (v18+, v20+, or v22+) installed on your machine.
 
-### 2. Installation
+### 2. Frontend Setup
 ```bash
 # Clone the repository
 git clone <your-repository-url>
 cd au-student-record-portal
 
-# Install dependencies
+# Install frontend dependencies
 npm install
-```
 
-### 3. Development Server
-```bash
+# Start Vite frontend dev server (runs on http://localhost:5173)
 npm run dev
 ```
-Open your browser and navigate to `http://localhost:5173`.
 
-### 4. Production Build
+### 3. Backend Server Setup
+The backend runs an Express server connected to SQLite in `/server`.
+
 ```bash
-npm run build
-npm run preview
+# Navigate to the server folder
+cd server
+
+# Create your .env file from the example
+cp .env.example .env
+
+# Install backend dependencies
+npm install
+
+# Initialize and seed the database with placeholder data
+npm run seed
+
+# Start the Express server (runs on http://localhost:5000)
+npm start
+# Or start in watch mode for development
+npm run dev
 ```
+
+> **Vite Proxy:** In development, requests sent from the React frontend to `/api/*` are automatically forwarded by Vite to the Express backend on `http://localhost:5000`.
+
+---
+
+## 🔌 API Endpoints Reference
+
+| Method | Endpoint | Role Required | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/health` | Public | Service health check |
+| `GET` | `/api/students/:id` | Public | Fetches complete student profile with courses, certifications, and achievements |
+| `POST` | `/api/certifications` | Student | Submits a new certificate with status `'Self-Reported'` |
+| `POST` | `/api/achievements` | Student | Submits a new achievement with status `'Self-Reported'` |
+| `GET` | `/api/staff/queue` | Academic Staff | Lists all student claims awaiting staff review |
+| `PATCH` | `/api/claims/:id/endorse` | **Academic Staff** (`x-user-role: academic-staff`) | Endorses or rejects a claim, updates claim table, and records an audit log |
+
 
 ---
 

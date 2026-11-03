@@ -24,6 +24,31 @@ export const formatTodayDDMMYYYY = (): string => {
   return `${day}/${month}/${year}`;
 };
 
+// Helper: Maps SQLite database rows (with status & endorsed_by) to frontend verification models
+function mapDbClaimToFrontend<T extends Record<string, any>>(claim: T): T {
+  let vStatus: VerificationStatus = 'unverified';
+  if (claim.status === 'Endorsed') {
+    vStatus = 'verified-institution';
+  } else if (claim.status === 'Self-Reported') {
+    vStatus = 'pending-review';
+  } else if (claim.status === 'Rejected') {
+    vStatus = 'unverified';
+  }
+
+  return {
+    ...claim,
+    issueDate: claim.issue_date || claim.issueDate,
+    instructorName: claim.instructor_name || claim.instructorName,
+    verification: {
+      status: vStatus,
+      verifiedBy: claim.endorsed_by || undefined,
+      verifiedAt: claim.verified_at || undefined,
+      verificationHash: claim.verification_hash || undefined,
+      evidenceName: claim.evidence_name || (claim.status === 'Endorsed' ? 'Faculty Academic Record' : undefined)
+    }
+  };
+}
+
 interface AppContextType {
   role: UserRole | null;
   setRole: (role: UserRole | null) => void;
@@ -37,6 +62,8 @@ interface AppContextType {
   setSelectedRequestId: (id: string | null) => void;
   recordCompleteness: number;
   accreditationTrustScore: number;
+  staffQueue: any[];
+  fetchStaffQueue: () => Promise<void>;
   
   // Actions
   updateStudentProfile: (updates: Partial<StudentProfile>) => void;
@@ -45,16 +72,16 @@ interface AppContextType {
     itemId: string,
     newStatus: VerificationStatus,
     verifierName?: string
-  ) => void;
+  ) => Promise<void>;
   addCourse: (course: Omit<Course, 'id'>) => void;
   removeCourse: (id: string) => void;
   addSkill: (skill: Omit<Skill, 'id'>) => void;
   removeSkill: (id: string) => void;
   addProject: (project: Omit<Project, 'id'>) => void;
   removeProject: (id: string) => void;
-  addCertification: (cert: Omit<Certification, 'id'>) => void;
+  addCertification: (cert: Omit<Certification, 'id'>) => Promise<void>;
   removeCertification: (id: string) => void;
-  addAchievement: (achievement: Omit<Achievement, 'id'>) => void;
+  addAchievement: (achievement: Omit<Achievement, 'id'>) => Promise<void>;
   removeAchievement: (id: string) => void;
   addLeadership: (leadership: Omit<Leadership, 'id'>) => void;
   removeLeadership: (id: string) => void;
@@ -77,9 +104,8 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const STORAGE_KEYS = {
-  STUDENT: 'au_portal_student_v3',
-  REQUESTS: 'au_portal_requests_v3',
-  ROLE: 'au_portal_role_v3',
+  ROLE: 'au_portal_role_v4',
+  REQUESTS: 'au_portal_requests_v4',
 };
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -88,28 +114,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (saved === 'academic-staff' || saved === 'student') {
       return saved as UserRole;
     }
-    // If previously saved as 'lecturer', migrate to 'academic-staff'
-    if (saved === 'lecturer') {
-      return 'academic-staff';
-    }
     return null;
   });
 
   const [activeStudentTab, setActiveStudentTab] = useState<'record' | 'request'>('record');
-
-  const [student, setStudent] = useState<StudentProfile>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.STUDENT);
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        console.error('Failed to parse saved student', e);
-      }
-    }
-    return initialStudent;
-  });
-
+  const [student, setStudent] = useState<StudentProfile>(initialStudent);
   const [academicStaff] = useState<AcademicStaff[]>(initialAcademicStaff);
+  const [staffQueue, setStaffQueue] = useState<any[]>([]);
 
   const [requests, setRequests] = useState<RecommendationRequest[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.REQUESTS);
@@ -129,11 +140,57 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [isHelpOpen, setIsHelpOpen] = useState(false);
 
-  // Sync with localStorage
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.STUDENT, JSON.stringify(student));
-  }, [student]);
+  // -------------------------------------------------------------
+  // Backend Integration: Fetch student and staff queue on mount
+  // -------------------------------------------------------------
+  const fetchStaffQueue = async () => {
+    try {
+      const res = await fetch('/api/staff/queue');
+      if (res.ok) {
+        const data = await res.json();
+        setStaffQueue(data.queue || []);
+      }
+    } catch (e) {
+      console.warn('Backend /api/staff/queue not reachable:', e);
+    }
+  };
 
+  useEffect(() => {
+    async function loadStudentFromBackend() {
+      try {
+        const res = await fetch('/api/students/stu-demo-001');
+        if (res.ok) {
+          const data = await res.json();
+          setStudent(prev => ({
+            ...prev,
+            id: data.id,
+            fullName: data.full_name || prev.fullName,
+            email: data.email || prev.email,
+            studentId: data.student_id || prev.studentId,
+            programme: data.programme || prev.programme,
+            faculty: data.faculty || prev.faculty,
+            yearOfStudy: data.year_of_study || prev.yearOfStudy,
+            gpa: data.gpa || prev.gpa,
+            academicStanding: data.academic_standing || prev.academicStanding,
+            aboutMe: data.about_me || prev.aboutMe,
+            resultSlipUrl: data.result_slip_url || prev.resultSlipUrl,
+            resultSlipName: data.result_slip_name || prev.resultSlipName,
+            resultSlipUploadedAt: data.result_slip_uploaded_at || prev.resultSlipUploadedAt,
+            courses: (data.courses || []).map(mapDbClaimToFrontend),
+            certifications: (data.certifications || []).map(mapDbClaimToFrontend),
+            achievements: (data.achievements || []).map(mapDbClaimToFrontend),
+          }));
+        }
+      } catch (e) {
+        console.warn('Backend /api/students unavailable, using local initial state:', e);
+      }
+    }
+
+    loadStudentFromBackend();
+    fetchStaffQueue();
+  }, []);
+
+  // Save role and requests state
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.REQUESTS, JSON.stringify(requests));
   }, [requests]);
@@ -182,13 +239,55 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const recordCompleteness = calculateCompleteness();
   const accreditationTrustScore = calculateAccreditationScore();
 
-  // Verification & Endorsement Engine for Academic Staff
-  const accreditClaim = (
+  // -------------------------------------------------------------
+  // Backend Integration: PATCH /api/claims/:id/endorse
+  // -------------------------------------------------------------
+  const accreditClaim = async (
     category: 'courses' | 'projects' | 'certifications' | 'achievements' | 'leadership',
     itemId: string,
     newStatus: VerificationStatus,
-    verifierName: string = 'Dr. Farai Muringani (Academic Staff, Simulated)'
+    verifierName: string = 'Demo Academic Staff'
   ) => {
+    const claimTypeMap: Record<string, string> = {
+      courses: 'course',
+      certifications: 'certification',
+      achievements: 'achievement'
+    };
+    const claimType = claimTypeMap[category];
+    const action = newStatus === 'unverified' ? 'Rejected' : 'Endorsed';
+
+    // If it's a course, certification or achievement, notify the backend API
+    if (claimType) {
+      try {
+        const res = await fetch(`/api/claims/${itemId}/endorse`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-user-role': 'academic-staff'
+          },
+          body: JSON.stringify({
+            claimType,
+            action,
+            staffName: verifierName
+          })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          const mapped = mapDbClaimToFrontend(data.claim);
+          setStudent(prev => ({
+            ...prev,
+            [category]: (prev[category] as any[]).map(item => item.id === itemId ? { ...item, ...mapped } : item)
+          }));
+          fetchStaffQueue();
+          return;
+        }
+      } catch (err) {
+        console.warn('Backend endorsement call failed, applying optimistic update:', err);
+      }
+    }
+
+    // Local / fallback update
     const today = formatTodayDDMMYYYY();
     const token = `AU-SIM-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
 
@@ -197,6 +296,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (item.id === itemId) {
           return {
             ...item,
+            status: action,
+            endorsed_by: verifierName,
             verification: {
               status: newStatus,
               verifiedBy: verifierName,
@@ -224,6 +325,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const newCourse: Course = { 
       ...courseData, 
       id: 'c-' + Date.now(),
+      status: 'Self-Reported',
       verification: {
         status: 'pending-review',
         evidenceName: 'Self-Reported Course Grade (Awaiting Staff Verification)'
@@ -261,10 +363,46 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setStudent(prev => ({ ...prev, projects: prev.projects.filter(p => p.id !== id) }));
   };
 
-  const addCertification = (certData: Omit<Certification, 'id'>) => {
+  // -------------------------------------------------------------
+  // Backend Integration: POST /api/certifications
+  // -------------------------------------------------------------
+  const addCertification = async (certData: Omit<Certification, 'id'>) => {
+    const payload = {
+      studentId: student.id,
+      title: certData.title,
+      issuer: certData.issuer,
+      issueDate: certData.issueDate || formatTodayDDMMYYYY(),
+      credentialId: certData.credentialId || null,
+      credentialUrl: certData.credentialUrl || null,
+      imageUrl: certData.imageUrl || null,
+    };
+
+    try {
+      const res = await fetch('/api/certifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        const created = await res.json();
+        const mapped = mapDbClaimToFrontend(created);
+        setStudent(prev => ({
+          ...prev,
+          certifications: [mapped, ...prev.certifications]
+        }));
+        fetchStaffQueue();
+        return;
+      }
+    } catch (err) {
+      console.warn('Backend POST /api/certifications failed, using optimistic state:', err);
+    }
+
+    // Fallback optimistic update
     const newCert: Certification = { 
       ...certData, 
       id: 'cert-' + Date.now(),
+      status: 'Self-Reported',
       verification: {
         status: 'pending-review',
         evidenceName: 'Uploaded Certificate (Awaiting Staff Verification)'
@@ -277,10 +415,45 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setStudent(prev => ({ ...prev, certifications: prev.certifications.filter(c => c.id !== id) }));
   };
 
-  const addAchievement = (achData: Omit<Achievement, 'id'>) => {
+  // -------------------------------------------------------------
+  // Backend Integration: POST /api/achievements
+  // -------------------------------------------------------------
+  const addAchievement = async (achData: Omit<Achievement, 'id'>) => {
+    const payload = {
+      studentId: student.id,
+      title: achData.title,
+      organization: achData.organization,
+      year: achData.year || new Date().getFullYear().toString(),
+      description: achData.description || '',
+      imageUrl: achData.imageUrl || null,
+    };
+
+    try {
+      const res = await fetch('/api/achievements', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        const created = await res.json();
+        const mapped = mapDbClaimToFrontend(created);
+        setStudent(prev => ({
+          ...prev,
+          achievements: [mapped, ...prev.achievements]
+        }));
+        fetchStaffQueue();
+        return;
+      }
+    } catch (err) {
+      console.warn('Backend POST /api/achievements failed, using optimistic state:', err);
+    }
+
+    // Fallback optimistic update
     const newAch: Achievement = { 
       ...achData, 
       id: 'ach-' + Date.now(),
+      status: 'Self-Reported',
       verification: {
         status: 'pending-review',
         evidenceName: 'Self-Submitted Achievement (Awaiting Staff Verification)'
@@ -366,15 +539,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const resetDemoData = () => {
-    localStorage.removeItem(STORAGE_KEYS.STUDENT);
     localStorage.removeItem(STORAGE_KEYS.REQUESTS);
-    localStorage.removeItem('au_portal_student_v1');
-    localStorage.removeItem('au_portal_requests_v1');
-    localStorage.removeItem('au_portal_student_v2');
-    localStorage.removeItem('au_portal_requests_v2');
     setStudent(initialStudent);
     setRequests(initialRequests);
     setSelectedRequestId(initialRequests[0]?.id || null);
+    fetchStaffQueue();
   };
 
   return (
@@ -392,6 +561,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setSelectedRequestId,
         recordCompleteness,
         accreditationTrustScore,
+        staffQueue,
+        fetchStaffQueue,
         updateStudentProfile,
         accreditClaim,
         addCourse,

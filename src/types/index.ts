@@ -12,6 +12,9 @@ export type RequestPurpose =
   | 'Research Fellowship'
   | 'Exchange Programme';
 
+// Database Claim Status (Enforced in SQLite backend)
+export type ClaimStatus = 'Self-Reported' | 'Endorsed' | 'Rejected';
+
 // Verification status of an academic record item (Simulated demo)
 export type VerificationStatus = 
   | 'verified-institution' // Verified by Academic Staff or Faculty Board (Simulated)
@@ -37,6 +40,8 @@ export interface Course {
   semester: string;
   instructorName?: string; // Academic Staff member teaching the course
   lecturerName?: string;   // Backward-compatible alias
+  status?: ClaimStatus;    // Database status
+  endorsed_by?: string | null;
   verification?: VerificationMetadata;
 }
 
@@ -68,6 +73,8 @@ export interface Certification {
   credentialId?: string;
   credentialUrl?: string;
   imageUrl?: string;
+  status?: ClaimStatus; // Database status
+  endorsed_by?: string | null;
   verification?: VerificationMetadata;
 }
 
@@ -78,6 +85,8 @@ export interface Achievement {
   year: string;
   description: string;
   imageUrl?: string;
+  status?: ClaimStatus; // Database status
+  endorsed_by?: string | null;
   verification?: VerificationMetadata;
 }
 
